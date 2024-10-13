@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { get } from '../utils/api';
-import { toast } from 'react-toastify';
+import { showToast } from '../utils/toast';
+import { useTranslation } from 'react-i18next';
 import {
     MapPinIcon,
     ClockIcon,
@@ -11,6 +12,7 @@ import {
 } from '@heroicons/react/24/solid';
 
 const Tours = () => {
+    const { t } = useTranslation();
     const [destinations, setDestinations] = useState([]);
     const [filteredDestinations, setFilteredDestinations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -36,10 +38,10 @@ const Tours = () => {
                 setDestinations(response.data);
                 setFilteredDestinations(response.data);
             } else {
-                throw new Error(response.msg || '获取目的地信息失败');
+                throw new Error(response.msg || t('failedToGetDestinations'));
             }
         } catch (err) {
-            toast.error(err.message || '获取目的地信息失败');
+            showToast.error(err.message || t('failedToGetDestinations'));
         } finally {
             setLoading(false);
         }
@@ -60,19 +62,19 @@ const Tours = () => {
     };
 
     if (loading) {
-        return <div className="text-center mt-8">加载中...</div>;
+        return <div className="text-center mt-8">{t('loading')}</div>;
     }
 
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
-                探索精彩旅游目的地
+                {t('exploreTourDestinations')}
             </h1>
             <div className="mb-8 flex justify-center">
                 <div className="relative w-full max-w-xl">
                     <input
                         type="text"
-                        placeholder="搜索目的地名称、类别或位置"
+                        placeholder={t('searchDestinationPlaceholder')}
                         className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -128,7 +130,7 @@ const Tours = () => {
                 </div>
             ) : (
                 <p className="text-center text-gray-600 text-xl">
-                    没有找到匹配的旅游目的地。
+                    {t('noDestinationsFound')}
                 </p>
             )}
         </div>

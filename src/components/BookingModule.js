@@ -49,6 +49,10 @@ const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
         setPricePerNight(roomTypes[selectedId].price_per_night);
     };
 
+    const handleRoomNumberChange = (change) => {
+        setNumberOfRooms(prevNumber => Math.max(1, prevNumber + change));
+    };
+
     const handleBooking = async (e) => {
         e.preventDefault();
         if (!isLoggedIn) {
@@ -149,17 +153,31 @@ const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
                             <UserGroupIcon className="h-5 w-5 inline-block mr-1 text-blue-500" />
                             {t("numberOfRooms")}
                         </label>
-                        <input
-                            type="number"
-                            id="numberOfRooms"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            value={numberOfRooms}
-                            onChange={(e) =>
-                                setNumberOfRooms(parseInt(e.target.value))
-                            }
-                            min="1"
-                            required
-                        />
+                        <div className="flex items-center justify-between bg-gray-100 p-2 rounded-lg">
+                            <button 
+                                type="button"
+                                onClick={() => handleRoomNumberChange(-1)}
+                                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-l-lg transition duration-300"
+                            >
+                                -
+                            </button>
+                            <input 
+                                type="number" 
+                                id="numberOfRooms"
+                                value={numberOfRooms} 
+                                onChange={(e) => setNumberOfRooms(Math.max(1, parseInt(e.target.value)))}
+                                className="w-16 text-center border-t border-b border-gray-300 py-2"
+                                min="1"
+                                required
+                            />
+                            <button 
+                                type="button"
+                                onClick={() => handleRoomNumberChange(1)}
+                                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r-lg transition duration-300"
+                            >
+                                +
+                            </button>
+                        </div>
                     </div>
                     <div className="bg-gray-100 p-4 rounded-lg mb-6">
                         <div className="flex justify-between items-center mb-2">

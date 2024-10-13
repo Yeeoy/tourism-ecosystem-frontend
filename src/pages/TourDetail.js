@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { get, post } from '../utils/api';
-import { toast } from 'react-toastify';
+import { showToast } from '../utils/toast';
+import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/authContext';
 import {
     MapPinIcon,
@@ -14,6 +15,7 @@ import {
 } from '@heroicons/react/24/solid';
 
 const TourDetail = () => {
+    const { t } = useTranslation();
     const [tour, setTour] = useState(null);
     const [destination, setDestination] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -38,10 +40,10 @@ const TourDetail = () => {
                 setTour(tourResponse.data);
                 fetchDestinationDetail(tourResponse.data.destination);
             } else {
-                throw new Error(tourResponse.msg || '获取旅游详情失败');
+                throw new Error(tourResponse.msg || t('failedToGetTourDetails'));
             }
         } catch (err) {
-            toast.error(err.message || '获取旅游详情失败');
+            showToast.error(err.message || t('failedToGetTourDetails'));
             setLoading(false);
         }
     };
@@ -52,10 +54,10 @@ const TourDetail = () => {
             if (destinationResponse.code === 200 && destinationResponse.data) {
                 setDestination(destinationResponse.data);
             } else {
-                throw new Error(destinationResponse.msg || '获取目的地详情失败');
+                throw new Error(destinationResponse.msg || t('failedToGetDestinationDetails'));
             }
         } catch (err) {
-            console.error('获取目的地详情失败:', err);
+            console.error(t('failedToGetDestinationDetails'), err);
         } finally {
             setLoading(false);
         }
@@ -68,13 +70,13 @@ const TourDetail = () => {
                 setIsBooked(response.data.booking_status);
             }
         } catch (err) {
-            console.error('检查预订状态失败:', err);
+            console.error(t('failedToCheckBookingStatus'), err);
         }
     };
 
     const handleBooking = async () => {
         if (!user) {
-            toast.error('请先登录后再预订');
+            showToast.error(t('pleaseLoginToBook'));
             return;
         }
 
@@ -91,13 +93,13 @@ const TourDetail = () => {
             if (response.code === 201 && response.data) {
                 setBookingStatus('success');
                 setIsBooked(true);
-                toast.success('预订成功！');
+                showToast.success(t('bookingSuccessful'));
             } else {
-                throw new Error(response.msg || '预订失败');
+                throw new Error(response.msg || t('bookingFailed'));
             }
         } catch (err) {
             setBookingStatus('error');
-            toast.error(err.message || '预订失败，请稍后重试');
+            showToast.error(err.message || t('bookingFailed'));
         }
     };
 
@@ -112,7 +114,7 @@ const TourDetail = () => {
     }
 
     if (!tour || !destination) {
-        return <div className="text-center mt-8">未找到旅游信息</div>;
+        return <div className="text-center mt-8">{t('tourInfoNotFound')}</div>;
     }
 
     return (
@@ -148,37 +150,37 @@ const TourDetail = () => {
                                 <div className="flex items-center bg-gray-100 p-4 rounded-lg">
                                     <ClockIcon className="h-8 w-8 text-blue-500 mr-3" />
                                     <div>
-                                        <h3 className="font-semibold">持续时间</h3>
-                                        <p>{tour.duration} 分钟</p>
+                                        <h3 className="font-semibold">{t('duration')}</h3>
+                                        <p>{tour.duration} {t('minutes')}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center bg-gray-100 p-4 rounded-lg">
                                     <UserGroupIcon className="h-8 w-8 text-green-500 mr-3" />
                                     <div>
-                                        <h3 className="font-semibold">最大容量</h3>
-                                        <p>{tour.max_capacity} 人</p>
+                                        <h3 className="font-semibold">{t('maxCapacity')}</h3>
+                                        <p>{tour.max_capacity} {t('people')}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center bg-gray-100 p-4 rounded-lg">
                                     <CalendarIcon className="h-8 w-8 text-purple-500 mr-3" />
                                     <div>
-                                        <h3 className="font-semibold">旅游日期</h3>
+                                        <h3 className="font-semibold">{t('tourDate')}</h3>
                                         <p>{tour.tour_date}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center bg-gray-100 p-4 rounded-lg">
                                     <UserIcon className="h-8 w-8 text-red-500 mr-3" />
                                     <div>
-                                        <h3 className="font-semibold">导游</h3>
+                                        <h3 className="font-semibold">{t('guide')}</h3>
                                         <p>{tour.guide_name}</p>
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <h3 className="text-xl font-semibold mb-4">目的地信息</h3>
+                                <h3 className="text-xl font-semibold mb-4">{t('destinationInfo')}</h3>
                                 <div className="bg-gray-100 p-4 rounded-lg">
-                                    <p className="mb-2"><span className="font-semibold">开放时间：</span>{destination.opening_hours}</p>
-                                    <p><span className="font-semibold">联系方式：</span>{destination.contact_info}</p>
+                                    <p className="mb-2"><span className="font-semibold">{t('openingHours')}：</span>{destination.opening_hours}</p>
+                                    <p><span className="font-semibold">{t('contactInfo')}：</span>{destination.contact_info}</p>
                                 </div>
                             </div>
                         </div>
@@ -186,19 +188,19 @@ const TourDetail = () => {
                 </div>
                 <div className="lg:w-1/3">
                     <div className="bg-white shadow-lg rounded-lg p-6">
-                        <h2 className="text-2xl font-bold mb-4">预订信息</h2>
+                        <h2 className="text-2xl font-bold mb-4">{t('bookingInfo')}</h2>
                         <div className="mb-4">
-                            <h3 className="text-lg font-semibold mb-2">价格</h3>
-                            <p className="text-3xl font-bold text-blue-600">¥{tour.price_per_person} <span className="text-sm text-gray-600">/ 人</span></p>
+                            <h3 className="text-lg font-semibold mb-2">{t('price')}</h3>
+                            <p className="text-3xl font-bold text-blue-600">{t('currency')}{tour.price_per_person} <span className="text-sm text-gray-600">/ {t('person')}</span></p>
                         </div>
                         <div className="mb-4">
-                            <h3 className="text-lg font-semibold mb-2">旅游类型</h3>
+                            <h3 className="text-lg font-semibold mb-2">{t('tourType')}</h3>
                             <p className="text-gray-700">{tour.tour_type}</p>
                         </div>
                         {isBooked ? (
                             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                                <strong className="font-bold">已预订！</strong>
-                                <span className="block sm:inline"> 您已成功预订此旅游项目。</span>
+                                <strong className="font-bold">{t('booked')}！</strong>
+                                <span className="block sm:inline"> {t('bookingSuccessMessage')}</span>
                             </div>
                         ) : (
                             <button 
@@ -210,7 +212,7 @@ const TourDetail = () => {
                                         : 'bg-blue-500 hover:bg-blue-600'
                                 } text-white py-2 px-4 rounded-lg transition duration-300`}
                             >
-                                {bookingStatus === 'loading' ? '预订中...' : '立即预订'}
+                                {bookingStatus === 'loading' ? t('booking') : t('bookNow')}
                             </button>
                         )}
                     </div>

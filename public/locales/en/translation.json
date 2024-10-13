@@ -131,5 +131,27 @@
     "october": "October",
     "november": "November",
     "december": "December"
-  }
+  },
+  "exploreTourDestinations": "Explore Tour Destinations",
+  "searchDestinationPlaceholder": "Search destination name, category or location",
+  "failedToGetDestinations": "Failed to get destinations",
+  "noDestinationsFound": "No matching destinations found.",
+  "failedToGetTourDetails": "Failed to get tour details",
+  "failedToGetDestinationDetails": "Failed to get destination details",
+  "failedToCheckBookingStatus": "Failed to check booking status",
+  "tourInfoNotFound": "Tour information not found",
+  "duration": "Duration",
+  "minutes": "minutes",
+  "maxCapacity": "Max Capacity",
+  "people": "people",
+  "tourDate": "Tour Date",
+  "guide": "Guide",
+  "destinationInfo": "Destination Information",
+  "bookingInfo": "Booking Information",
+  "price": "Price",
+  "person": "person",
+  "tourType": "Tour Type",
+  "booked": "Booked",
+  "bookingSuccessMessage": "You have successfully booked this tour.",
+  "booking": "Booking..."
 }

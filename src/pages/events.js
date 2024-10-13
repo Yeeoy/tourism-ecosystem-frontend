@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { get, post } from "../utils/api";
-import { toast } from "react-toastify";
+import { showToast } from "../utils/toast"; // 导入封装的 toast
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -54,7 +54,7 @@ function Events() {
                 throw new Error(eventsResponse.msg || t('failedToGetEvents'));
             }
         } catch (err) {
-            toast.error(err.message || t('failedToGetEvents'));
+            showToast.error(err.message || t('failedToGetEvents'));
         } finally {
             setLoading(false);
         }
@@ -73,7 +73,7 @@ function Events() {
                 throw new Error(promotionsResponse.msg || t('failedToGetPromotions'));
             }
         } catch (err) {
-            toast.error(err.message || t('failedToGetPromotions'));
+            showToast.error(err.message || t('failedToGetPromotions'));
         }
     };
 
@@ -139,20 +139,13 @@ function Events() {
                 throw new Error(response.msg || t('failedToCalculatePrice'));
             }
         } catch (err) {
-            toast.error(err.message || t('failedToCalculatePrice'));
+            showToast.error(err.message || t('failedToCalculatePrice'));
         }
     };
 
     const handleSubmit = async (eventId) => {
         if (!user) {
-            toast.error(t('pleaseLoginToRegister'), {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-            });
+            showToast.error(t('pleaseLoginToRegister'));
             return;
         }
 
@@ -160,14 +153,7 @@ function Events() {
         const promotion = promotions[eventId];
 
         if (!price) {
-            toast.error(t('pleaseSelectParticipants'), {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-            });
+            showToast.error(t('pleaseSelectParticipants'));
             return;
         }
 
@@ -183,21 +169,14 @@ function Events() {
 
             if (response.code === 201 && response.data) {
                 setBookingStatus(prev => ({ ...prev, [eventId]: 'success' }));
-                toast.success(t('registrationSuccess'));
+                showToast.success(t('registrationSuccess'));
                 // 可以在这里添加其他成功后的逻辑，比如更新UI或重新获取数据
             } else {
                 throw new Error(response.msg || t('registrationFailed'));
             }
         } catch (err) {
             setBookingStatus(prev => ({ ...prev, [eventId]: 'error' }));
-            toast.error(err.message || t('registrationFailed'), {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-            });
+            showToast.error(err.message || t('registrationFailed'));
         }
     };
 

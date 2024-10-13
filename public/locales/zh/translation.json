@@ -131,5 +131,27 @@
     "october": "10月",
     "november": "11月",
     "december": "12月"
-  }
+  },
+  "exploreTourDestinations": "探索旅游目的地",
+  "searchDestinationPlaceholder": "搜索目的地名称、类别或位置",
+  "failedToGetDestinations": "获取目的地信息失败",
+  "noDestinationsFound": "没有找到匹配的旅游目的地。",
+  "failedToGetTourDetails": "获取旅游详情失败",
+  "failedToGetDestinationDetails": "获取目的地详情失败",
+  "failedToCheckBookingStatus": "检查预订状态失败",
+  "tourInfoNotFound": "未找到旅游信息",
+  "duration": "持续时间",
+  "minutes": "分钟",
+  "maxCapacity": "最大容量",
+  "people": "人",
+  "tourDate": "旅游日期",
+  "guide": "导游",
+  "destinationInfo": "目的地信息",
+  "bookingInfo": "预订信息",
+  "price": "价格",
+  "person": "人",
+  "tourType": "旅游类型",
+  "booked": "已预订",
+  "bookingSuccessMessage": "您已成功预订此旅游项目。",
+  "booking": "预订中..."
 }
