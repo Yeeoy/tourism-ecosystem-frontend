@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { get, post, del } from "../utils/api";
-import { toast } from "react-toastify";
-import { useTranslation } from 'react-i18next'; // 添加这行
+import { showToast } from "../utils/toast"; // 导入封装的 toast
+import { useTranslation } from 'react-i18next';
 import {
     StarIcon,
     MapPinIcon,
@@ -18,7 +18,7 @@ import { AuthContext } from "../context/authContext";
 import BookingModule from "../components/BookingModule";
 
 const HotelDetail = () => {
-    const { t } = useTranslation(); // 添加这行
+    const { t } = useTranslation();
     const [hotel, setHotel] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -47,7 +47,7 @@ const HotelDetail = () => {
                 throw new Error(response.msg || "获取酒店详情失败");
             }
         } catch (err) {
-            toast.error(err.message || "获取酒店详情失败");
+            showToast.error(err.message || "获取酒店详情失败");
         }
     };
 
@@ -78,7 +78,7 @@ const HotelDetail = () => {
                 throw new Error(response.msg || "获取评论失败");
             }
         } catch (err) {
-            toast.error(err.message || "获取评论失败");
+            showToast.error(err.message || "获取评论失败");
         } finally {
             setLoading(false);
         }
@@ -94,74 +94,51 @@ const HotelDetail = () => {
             }
         } catch (err) {
             console.error("获取客房服务失败:", err);
-            toast.error("获取客房服务信息失败");
+            showToast.error("获取客房服务信息失败");
         }
     };
 
     const handleSubmitReview = async (e) => {
         e.preventDefault();
         if (!user) {
-            toast.error("请先登录后再评论", {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-            });
+            showToast.error(t("pleaseLoginToComment")); // 使用封装的 toast
             return;
         }
         if (newRating === 0) {
-            toast.error("请选择评分", {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-            });
+            showToast.error(t("pleaseSelectRating")); // 使用封装的 toast
             return;
         }
         try {
             const response = await post("/api/accommodation/feedback-review/", {
                 rating: newRating,
                 review: newReview,
-                date: new Date().toISOString().split("T")[0], // 当前日期
+                date: new Date().toISOString().split("T")[0],
                 accommodation_id: parseInt(id),
                 user: user.id,
             });
             if (response.code === 201 && response.data) {
-                // 成功时不显示通知，直接刷新页面
+                showToast.success(t("reviewSubmitted")); // 使用封装的 toast
                 window.location.reload();
             } else {
-                throw new Error(response.msg || "提交评论失败");
+                throw new Error(response.msg || t("submitReviewFailed"));
             }
         } catch (err) {
-            toast.error(err.message || "提交评论失败", {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-            });
+            showToast.error(err.message || t("submitReviewFailed")); // 使用封装的 toast
         }
     };
 
     const handleDeleteReview = async (reviewId) => {
-        if (window.confirm("确定要删除这条评论吗？")) {
+        if (window.confirm(t("confirmDeleteReview"))) {
             try {
                 const response = await del(
                     `/api/accommodation/feedback-review/${reviewId}/`
                 );
-                // 如果删除成功（不是 404），直接刷新页面
+                showToast.success(t("reviewDeleted")); // 使用封装的 toast
                 window.location.reload();
             } catch (err) {
-                // 有在收到 404 响应时才显示错误提示
                 if (err.response && err.response.status === 404) {
-                    toast.error("删除评论失败：评论不存在");
+                    showToast.error(t("deleteReviewFailed")); // 使用封装的 toast
                 } else {
-                    // 对于其他错误，我们仍然刷新页面
                     window.location.reload();
                 }
             }

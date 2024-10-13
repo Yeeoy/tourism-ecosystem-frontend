@@ -24,7 +24,7 @@
   "exploreWorldwideAttractions": "探索世界各地的精彩景点和文化",
   "quickBooking": "快速预订",
   "simpleBookingProcess": "简单快捷的预订流程，节省您的时间",
-  "qualityExperience": "优质���验",
+  "qualityExperience": "优质体验",
   "carefullySelectedServices": "精心挑选的酒店、活动和旅游项目",
   "aboutTravely": "关于 Travely",
   "aboutTravelyDescription": "Travely 致力于为您提供最佳的旅行体验。无论是城市探险、海滩度假还是文化之旅，我们都能满足您的需求。我们的专业团队将确保您的每次旅行都是独特而难忘的。",
@@ -82,5 +82,15 @@
   "pleaseLoginToBook": "请登录后再进行预订",
   "bookingSuccessful": "预订成功！",
   "bookingFailed": "预订失败，请稍后再试",
-  "currency": "$"
+  "currency": "$",
+  "pricePerNight": "每晚价格",
+  "numberOfNights": "入住天数",
+  "totalPrice": "总价格",
+  "pleaseSelectRating": "请选择评分",
+  "pleaseLoginToComment": "请登录后再评论",
+  "reviewSubmitted": "评论提交成功",
+  "submitReviewFailed": "评论提交失败",
+  "confirmDeleteReview": "确定要删除这条评论吗？",
+  "reviewDeleted": "评论删除成功",
+  "deleteReviewFailed": "评论删除失败"
 }
