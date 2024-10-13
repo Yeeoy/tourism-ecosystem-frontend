@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { get, post } from "../utils/api";
 import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     CalendarIcon,
     ClockIcon,
@@ -10,11 +11,13 @@ import {
     CurrencyDollarIcon,
     TicketIcon,
     TagIcon,
-    MagnifyingGlassIcon
+    MagnifyingGlassIcon,
+    LockClosedIcon
 } from "@heroicons/react/24/solid";
 import { AuthContext } from "../context/authContext";
 
 function Events() {
+    const { t, i18n } = useTranslation(); // 添加 i18n
     const [events, setEvents] = useState([]);
     const [filteredEvents, setFilteredEvents] = useState([]);
     const [promotions, setPromotions] = useState({});
@@ -48,10 +51,10 @@ function Events() {
                 setFilteredEvents(eventsResponse.data);
                 fetchPromotions();
             } else {
-                throw new Error(eventsResponse.msg || "获取活动信息失败");
+                throw new Error(eventsResponse.msg || t('failedToGetEvents'));
             }
         } catch (err) {
-            toast.error(err.message || "获取活动信息失败");
+            toast.error(err.message || t('failedToGetEvents'));
         } finally {
             setLoading(false);
         }
@@ -67,10 +70,10 @@ function Events() {
                 });
                 setPromotions(promotionsMap);
             } else {
-                throw new Error(promotionsResponse.msg || "获取促销信息失败");
+                throw new Error(promotionsResponse.msg || t('failedToGetPromotions'));
             }
         } catch (err) {
-            console.error('获取促销信息失败:', err);
+            toast.error(err.message || t('failedToGetPromotions'));
         }
     };
 
@@ -89,17 +92,20 @@ function Events() {
     };
 
     const formatDate = (dateString) => {
+        const date = new Date(dateString);
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString('zh-CN', options);
+        return date.toLocaleDateString(i18n.language, options);
     };
 
     const handleEventSelect = async (eventId) => {
         setSelectedEvent(eventId);
         setParticipants(prev => ({ ...prev, [eventId]: 1 }));
-        try {
-            await handleParticipantChange(eventId, 1);
-        } catch (error) {
-            console.error('选择活动时计算价格失败:', error);
+        if (user) {
+            try {
+                await handleParticipantChange(eventId, 1);
+            } catch (error) {
+                console.error('选择活动时计算价格失败:', error);
+            }
         }
     };
 
@@ -130,16 +136,16 @@ function Events() {
                     }
                 }));
             } else {
-                throw new Error(response.msg || "计算价格失败");
+                throw new Error(response.msg || t('failedToCalculatePrice'));
             }
         } catch (err) {
-            toast.error(err.message || "计算价格失败");
+            toast.error(err.message || t('failedToCalculatePrice'));
         }
     };
 
     const handleSubmit = async (eventId) => {
         if (!user) {
-            toast.error("请先登录后再报名", {
+            toast.error(t('pleaseLoginToRegister'), {
                 position: "top-center",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -154,7 +160,7 @@ function Events() {
         const promotion = promotions[eventId];
 
         if (!price) {
-            toast.error("请先选择参与人数", {
+            toast.error(t('pleaseSelectParticipants'), {
                 position: "top-center",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -177,14 +183,14 @@ function Events() {
 
             if (response.code === 201 && response.data) {
                 setBookingStatus(prev => ({ ...prev, [eventId]: 'success' }));
-                toast.success('报名成功！');
+                toast.success(t('registrationSuccess'));
                 // 可以在这里添加其他成功后的逻辑，比如更新UI或重新获取数据
             } else {
-                throw new Error(response.msg || "报名失败");
+                throw new Error(response.msg || t('registrationFailed'));
             }
         } catch (err) {
             setBookingStatus(prev => ({ ...prev, [eventId]: 'error' }));
-            toast.error(err.message || "报名失败，请稍后重试", {
+            toast.error(err.message || t('registrationFailed'), {
                 position: "top-center",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -207,12 +213,12 @@ function Events() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">探索精彩活动</h1>
+            <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">{t('exploreEvents')}</h1>
             <div className="mb-8 flex justify-center">
                 <div className="relative w-full max-w-xl">
                     <input
                         type="text"
-                        placeholder="搜索活动名称、地点或描述"
+                        placeholder={t('searchEventPlaceholder')}
                         className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -238,28 +244,28 @@ function Events() {
                                         <div className="flex items-center bg-gray-100 p-4 rounded-lg">
                                             <CalendarIcon className="h-8 w-8 text-blue-500 mr-3" />
                                             <div>
-                                                <h3 className="font-semibold">日期</h3>
+                                                <h3 className="font-semibold">{t('date')}</h3>
                                                 <p>{formatDate(event.event_date)}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center bg-gray-100 p-4 rounded-lg">
                                             <ClockIcon className="h-8 w-8 text-purple-500 mr-3" />
                                             <div>
-                                                <h3 className="font-semibold">时间</h3>
+                                                <h3 className="font-semibold">{t('time')}</h3>
                                                 <p>{event.start_time} - {event.end_time}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center bg-gray-100 p-4 rounded-lg">
                                             <MapPinIcon className="h-8 w-8 text-red-500 mr-3" />
                                             <div>
-                                                <h3 className="font-semibold">地点</h3>
+                                                <h3 className="font-semibold">{t('venue')}</h3>
                                                 <p>{event.venue}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center bg-gray-100 p-4 rounded-lg">
                                             <UserGroupIcon className="h-8 w-8 text-green-500 mr-3" />
                                             <div>
-                                                <h3 className="font-semibold">最大参与人数</h3>
+                                                <h3 className="font-semibold">{t('maxParticipants')}</h3>
                                                 <p>{event.max_participants}</p>
                                             </div>
                                         </div>
@@ -273,15 +279,15 @@ function Events() {
                                         <div className="flex items-center bg-gray-100 p-4 rounded-lg mb-4">
                                             <TicketIcon className="h-8 w-8 text-blue-500 mr-3" />
                                             <div>
-                                                <h3 className="font-semibold">入场费</h3>
-                                                <p className="text-xl font-bold text-blue-600">¥{event.entry_fee}</p>
+                                                <h3 className="font-semibold">{t('entryFee')}</h3>
+                                                <p className="text-xl font-bold text-blue-600">{t('currency')}{event.entry_fee}</p>
                                             </div>
                                         </div>
                                         {promotion && (
                                             <div className="flex items-center bg-yellow-100 p-4 rounded-lg mb-4">
                                                 <TagIcon className="h-8 w-8 text-yellow-600 mr-3" />
                                                 <div>
-                                                    <h3 className="font-semibold">促销信息</h3>
+                                                    <h3 className="font-semibold">{t('promotionInfo')}</h3>
                                                     <p className="text-sm">{formatDate(promotion.promotion_start_date)} - {formatDate(promotion.promotion_end_date)}</p>
                                                 </div>
                                             </div>
@@ -292,9 +298,9 @@ function Events() {
                                             onClick={() => handleEventSelect(event.id)}
                                             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
                                         >
-                                            选择此活动
+                                            {t('selectEvent')}
                                         </button>
-                                    ) : (
+                                    ) : user ? (
                                         <div>
                                             <div className="flex items-center justify-between bg-gray-100 p-2 rounded-lg mb-4">
                                                 <button 
@@ -326,50 +332,61 @@ function Events() {
                                                 disabled={bookingStatus[event.id] === 'loading'}
                                             >
                                                 {bookingStatus[event.id] === 'loading' 
-                                                    ? '报名中...' 
+                                                    ? t('registering')
                                                     : price 
-                                                        ? `报名参加 (¥${price.totalAmount})` 
-                                                        : '报名参加'
+                                                        ? t('registerWithPrice', { price: price.totalAmount })
+                                                        : t('register')
                                                 }
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center">
+                                            <LockClosedIcon className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                                            <p className="text-gray-600 mb-2">{t('pleaseLoginToRegister')}</p>
+                                            <button 
+                                                onClick={() => navigate('/login')}
+                                                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+                                            >
+                                                {t('goToLogin')}
                                             </button>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* 右侧：价格详情 */}
-                                {isSelected && price && (
+                                {isSelected && price && user && (
                                     <div className="p-6 lg:w-1/4 transition-all duration-300 ease-in-out">
                                         <div className="bg-gray-100 p-6 rounded-lg shadow-md">
-                                            <h3 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">价格详情</h3>
+                                            <h3 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">{t('priceDetails')}</h3>
                                             <div className="space-y-3">
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600">单价</span>
-                                                    <span className="font-semibold">¥{price.ticketPrice}</span>
+                                                    <span className="text-gray-600">{t('unitPrice')}</span>
+                                                    <span className="font-semibold">{t('currency')}{price.ticketPrice}</span>
                                                 </div>
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600">数量</span>
+                                                    <span className="text-gray-600">{t('quantity')}</span>
                                                     <span className="font-semibold">{price.numberOfTickets}</span>
                                                 </div>
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600">原价总额</span>
-                                                    <span className="font-semibold">¥{price.baseAmount}</span>
+                                                    <span className="text-gray-600">{t('originalTotal')}</span>
+                                                    <span className="font-semibold">{t('currency')}{price.baseAmount}</span>
                                                 </div>
                                                 {price.discountAmount > 0 && (
                                                     <>
                                                         <div className="flex justify-between items-center text-orange-600">
-                                                            <span>折扣</span>
-                                                            <span className="font-bold">{(price.discount * 100).toFixed(0)}折</span>
+                                                            <span>{t('discount')}</span>
+                                                            <span className="font-bold">{(price.discount * 100).toFixed(0)}%</span>
                                                         </div>
                                                         <div className="flex justify-between items-center text-green-600">
-                                                            <span>优惠金额</span>
-                                                            <span className="font-bold">- ¥{price.discountAmount}</span>
+                                                            <span>{t('discountAmount')}</span>
+                                                            <span className="font-bold">- {t('currency')}{price.discountAmount}</span>
                                                         </div>
                                                     </>
                                                 )}
-                                                <div className="mt-4 pt-3 border-t border-gray-300">
+                                                <div className="mt-4 pt-4 border-t border-gray-300">
                                                     <div className="flex justify-between items-center">
-                                                        <span className="text-lg font-bold text-blue-600">应付总价</span>
-                                                        <span className="text-2xl font-bold text-blue-600">¥{price.totalAmount}</span>
+                                                        <span className="text-lg font-bold text-blue-600">{t('totalPayable')}</span>
+                                                        <span className="text-2xl font-bold text-blue-600">{t('currency')}{price.totalAmount}</span>
                                                     </div>
                                                 </div>
                                             </div>
