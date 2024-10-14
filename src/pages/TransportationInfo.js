@@ -171,7 +171,7 @@ const TransportationInfo = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
+            <h1 className="text-3xl font-bold mb-12 mt-8 text-center text-gray-800">
                 {t("transportationInfo")}
             </h1>
 
@@ -308,7 +308,7 @@ const TransportationInfo = () => {
                                                     {route.distance} km
                                                 </p>
                                                 <p className="text-sm text-gray-600">
-                                                    {route.estimated_time} 分钟
+                                                    {route.estimated_time} {t("minutes")}
                                                 </p>
                                             </div>
                                         </div>

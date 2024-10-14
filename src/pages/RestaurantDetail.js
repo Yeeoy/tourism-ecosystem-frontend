@@ -15,7 +15,7 @@ import {
     UserGroupIcon,
     CheckCircleIcon,
 } from "@heroicons/react/24/solid";
-
+import defaultRestaurantImage from "../assets/images/default-restaurant.jpg";
 const RestaurantDetail = () => {
     const { t } = useTranslation();
     const [restaurant, setRestaurant] = useState(null);
@@ -236,7 +236,7 @@ const RestaurantDetail = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-6 mt-6">
                 <button
                     onClick={handleGoBack}
                     className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition duration-300 mr-4">
@@ -251,9 +251,13 @@ const RestaurantDetail = () => {
                     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                         <div className="relative h-96">
                             <img
-                                src={`https://picsum.photos/seed/${restaurant.id}/800/600`}
+                                src={restaurant.img_url || defaultRestaurantImage}
                                 alt={restaurant.name}
                                 className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = defaultRestaurantImage;
+                                }}
                             />
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
                                 <div className="flex items-center text-white">

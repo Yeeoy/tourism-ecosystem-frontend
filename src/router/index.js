@@ -19,7 +19,9 @@ import Restaurants from "../pages/Restaurants";
 import RestaurantDetail from "../pages/RestaurantDetail";
 import RestaurantOrders from "../pages/RestaurantOrders";
 import TableReservations from "../pages/TableReservations";
-
+import TermsOfService from "../pages/TermsOfService";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
+import EventLog from "../pages/EventLog";
 const router = createBrowserRouter([
     {
         path: "/",
@@ -101,6 +103,18 @@ const router = createBrowserRouter([
             {
                 path: "/table-reservations",
                 element: <TableReservations />,
+            },
+            {
+                path: "/terms",
+                element: <TermsOfService />,
+            },
+            {
+                path: "/privacy",
+                element: <PrivacyPolicy />,
+            },
+            {
+                path: "/event-log",
+                element: <EventLog />,
             },
             {
                 path: "*",

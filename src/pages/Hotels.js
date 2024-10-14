@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { get } from "../utils/api";
-import { toast } from "react-toastify";
-import { useTranslation } from 'react-i18next';
+import { showToast } from "../utils/toast";
+import { useTranslation } from "react-i18next";
 import {
     StarIcon,
     MapPinIcon,
@@ -10,8 +10,9 @@ import {
     CurrencyDollarIcon,
     MagnifyingGlassIcon,
     ClockIcon,
-    PhoneIcon
+    PhoneIcon,
 } from "@heroicons/react/24/solid";
+import defaultHotelImage from "../assets/images/default-hotel.jpg";
 
 const Hotels = () => {
     const { t } = useTranslation();
@@ -42,25 +43,27 @@ const Hotels = () => {
                 setFilteredHotels(response.data);
                 fetchRoomTypes(response.data);
             } else {
-                throw new Error(response.msg || "获取酒店信息失败");
+                throw new Error(response.msg || t("failedToGetHotels"));
             }
         } catch (err) {
-            toast.error(err.message || "获取酒店信息失败");
+            showToast.error(err.message || t("failedToGetHotels"));
         } finally {
             setLoading(false);
         }
     };
 
     const fetchRoomTypes = async (hotels) => {
-        const types = new Set(hotels.flatMap(hotel => hotel.types));
+        const types = new Set(hotels.flatMap((hotel) => hotel.types));
         const typePromises = Array.from(types).map(async (typeId) => {
             try {
-                const response = await get(`/api/accommodation/room-type/${typeId}/`);
+                const response = await get(
+                    `/api/accommodation/room-type/${typeId}/`
+                );
                 if (response.code === 200 && response.data) {
                     return { [typeId]: response.data };
                 }
             } catch (err) {
-                console.error(`获取房间类型 ${typeId} 失败:`, err);
+                console.error(t("failedToGetRoomType", { id: typeId }), err);
             }
             return null;
         });
@@ -76,10 +79,16 @@ const Hotels = () => {
         } else {
             const filtered = hotels.filter(
                 (hotel) =>
-                    hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    hotel.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    hotel.types.some(typeId => 
-                        roomTypes[typeId]?.room_type.toLowerCase().includes(searchTerm.toLowerCase())
+                    hotel.name
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                    hotel.location
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                    hotel.types.some((typeId) =>
+                        roomTypes[typeId]?.room_type
+                            .toLowerCase()
+                            .includes(searchTerm.toLowerCase())
                     )
             );
             setFilteredHotels(filtered);
@@ -87,19 +96,19 @@ const Hotels = () => {
     };
 
     if (loading) {
-        return <div className="text-center mt-8">加载中...</div>;
+        return <div className="text-center mt-8">{t("loading")}</div>;
     }
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
-                {t('exploreOurHotels')}
+            <h1 className="text-4xl font-bold mb-12 mt-8 text-center text-gray-800">
+                {t("exploreOurHotels")}
             </h1>
             <div className="mb-8 flex justify-center">
                 <div className="relative w-full max-w-xl">
                     <input
                         type="text"
-                        placeholder={t('searchHotelPlaceholder')}
+                        placeholder={t("searchHotelPlaceholder")}
                         className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -117,9 +126,13 @@ const Hotels = () => {
                             <div className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 hover:shadow-xl transform hover:-translate-y-1">
                                 <div className="relative h-64">
                                     <img
-                                        src={`https://picsum.photos/seed/${hotel.id}/400/300`}
+                                        src={hotel.img_url || defaultHotelImage}
                                         alt={hotel.name}
                                         className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = defaultHotelImage;
+                                        }}
                                     />
                                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
                                         <h2 className="text-2xl font-bold text-white mb-1">
@@ -127,7 +140,9 @@ const Hotels = () => {
                                         </h2>
                                         <div className="flex items-center text-white">
                                             <MapPinIcon className="h-5 w-5 mr-2" />
-                                            <span className="text-sm">{hotel.location}</span>
+                                            <span className="text-sm">
+                                                {hotel.location}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -142,20 +157,37 @@ const Hotels = () => {
                                             )
                                         )}
                                         <span className="ml-2 text-sm text-gray-600">
-                                            ({hotel.star_rating} {t('stars')})
+                                            ({hotel.star_rating} {t("stars")})
                                         </span>
                                     </div>
                                     <div className="flex items-center mb-2 text-sm text-gray-600">
                                         <HomeIcon className="h-5 w-5 text-blue-500 mr-2" />
-                                        <span>{t('totalRooms')}: {hotel.total_rooms}</span>
+                                        <span>
+                                            {t("totalRooms")}:{" "}
+                                            {hotel.total_rooms}
+                                        </span>
                                     </div>
                                     <div className="flex items-center mb-2 text-sm text-gray-600">
                                         <CurrencyDollarIcon className="h-5 w-5 text-green-500 mr-2" />
-                                        <span>{t('types')}: {hotel.types.map(typeId => roomTypes[typeId]?.room_type).join(', ')}</span>
+                                        <span>
+                                            {t("types")}:{" "}
+                                            {hotel.types
+                                                .map(
+                                                    (typeId) =>
+                                                        roomTypes[typeId]
+                                                            ?.room_type
+                                                )
+                                                .join(", ")}
+                                        </span>
                                     </div>
                                     <div className="flex items-center mb-2 text-sm text-gray-600">
                                         <ClockIcon className="h-5 w-5 text-purple-500 mr-2" />
-                                        <span>{t('checkIn')}: {hotel.check_in_time}, {t('checkOut')}: {hotel.check_out_time}</span>
+                                        <span>
+                                            {t("checkIn")}:{" "}
+                                            {hotel.check_in_time},{" "}
+                                            {t("checkOut")}:{" "}
+                                            {hotel.check_out_time}
+                                        </span>
                                     </div>
                                     <div className="flex items-center text-sm text-gray-600">
                                         <PhoneIcon className="h-5 w-5 text-red-500 mr-2" />
@@ -168,7 +200,7 @@ const Hotels = () => {
                 </div>
             ) : (
                 <p className="text-center text-gray-600 text-xl">
-                    {t('noHotelsFound')}
+                    {t("noHotelsFound")}
                 </p>
             )}
         </div>

@@ -1,10 +1,12 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
-import { toast } from "react-toastify";
-import { LockClosedIcon, UserIcon } from "@heroicons/react/24/solid";
+import { showToast } from "../utils/toast";
+import { useTranslation } from "react-i18next";
+import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
 
 const Login = () => {
+    const { t } = useTranslation();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
@@ -13,7 +15,6 @@ const Login = () => {
     const { login } = useContext(AuthContext);
 
     useEffect(() => {
-        // 从本地存储中获取保存的登录信息
         const savedEmail = localStorage.getItem("rememberedEmail");
         const savedPassword = localStorage.getItem("rememberedPassword");
         const savedRememberMe = localStorage.getItem("rememberMe") === "true";
@@ -31,17 +32,15 @@ const Login = () => {
         try {
             const response = await login(email, password);
             if (response.code === 400) {
-                toast.error("用户名或密码错误");
+                showToast.error(t("invalidCredentials"));
             } else {
-                toast.success("登录成功！");
+                showToast.success(t("loginSuccess"));
 
-                // 如果选择了"记住我"，保存登录信息
                 if (rememberMe) {
                     localStorage.setItem("rememberedEmail", email);
                     localStorage.setItem("rememberedPassword", password);
                     localStorage.setItem("rememberMe", "true");
                 } else {
-                    // 如果没有选择"记住我"，清除保存的信息
                     localStorage.removeItem("rememberedEmail");
                     localStorage.removeItem("rememberedPassword");
                     localStorage.removeItem("rememberMe");
@@ -51,7 +50,7 @@ const Login = () => {
             }
         } catch (err) {
             console.error(err);
-            toast.error("登录失败，请稍后再试");
+            showToast.error(t("loginFailed"));
         } finally {
             setLoading(false);
         }
@@ -67,14 +66,14 @@ const Login = () => {
             <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl backdrop-blur-sm bg-opacity-80">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        登录您的账户
+                        {t("loginToYourAccount")}
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
-                        或{" "}
+                        {t("or")}{" "}
                         <Link
                             to="/register"
                             className="font-medium text-blue-600 hover:text-blue-500">
-                            注册新账户
+                            {t("registerNewAccount")}
                         </Link>
                     </p>
                 </div>
@@ -83,11 +82,11 @@ const Login = () => {
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="email-address" className="sr-only">
-                                电子邮箱
+                                {t("email")}
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <UserIcon
+                                    <EnvelopeIcon
                                         className="h-5 w-5 text-gray-400"
                                         aria-hidden="true"
                                     />
@@ -99,7 +98,7 @@ const Login = () => {
                                     autoComplete="email"
                                     required
                                     className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                    placeholder="电子邮箱"
+                                    placeholder={t("emailPlaceholder")}
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
@@ -107,7 +106,7 @@ const Login = () => {
                         </div>
                         <div>
                             <label htmlFor="password" className="sr-only">
-                                密码
+                                {t("password")}
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -123,7 +122,7 @@ const Login = () => {
                                     autoComplete="current-password"
                                     required
                                     className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                    placeholder="密码"
+                                    placeholder={t("passwordPlaceholder")}
                                     value={password}
                                     onChange={(e) =>
                                         setPassword(e.target.value)
@@ -141,12 +140,14 @@ const Login = () => {
                                 type="checkbox"
                                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                 checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
+                                onChange={(e) =>
+                                    setRememberMe(e.target.checked)
+                                }
                             />
                             <label
                                 htmlFor="remember-me"
                                 className="ml-2 block text-sm text-gray-900">
-                                记住我
+                                {t("rememberMe")}
                             </label>
                         </div>
 
@@ -154,7 +155,7 @@ const Login = () => {
                             <a
                                 href="#"
                                 className="font-medium text-blue-600 hover:text-blue-500">
-                                忘记密码?
+                                {t("forgotPassword")}
                             </a>
                         </div>
                     </div>
@@ -170,7 +171,7 @@ const Login = () => {
                                     aria-hidden="true"
                                 />
                             </span>
-                            {loading ? "登录中..." : "登录"}
+                            {loading ? t("loggingIn") : t("login")}
                         </button>
                     </div>
                 </form>

@@ -1,17 +1,20 @@
 import React, { createContext, useState, useEffect } from "react";
 import { post, get } from "../utils/api";
-import { toast } from "react-toastify";
+import { showToast } from "../utils/toast";
+import { useTranslation } from 'react-i18next';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+    const { t } = useTranslation();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const login = async (email, password) => {
         try {
-            const response = await post(
+            // 首先获取 Token
+            const tokenResponse = await post(
                 "/api/customUser/token/",
                 {
                     email,
@@ -23,15 +26,34 @@ export const AuthProvider = ({ children }) => {
                     },
                 }
             );
-            if (response.code === 200 && response.data) {
-                localStorage.setItem("token", response.data.token);
-                localStorage.setItem("user_id", response.data.user_id);
-                setUser({ id: response.data.user_id, email });
+
+            if (tokenResponse.code === 200 && tokenResponse.data) {
+                const token = tokenResponse.data.token;
+                localStorage.setItem("token", token);
+
+                // 使用获取到的 Token 请求用户详细信息
+                const userResponse = await get("/api/customUser/me/", {
+                    headers: {
+                        "Authorization": `Token ${token}`
+                    }
+                });
+
+                if (userResponse.code === 200 && userResponse.data) {
+                    const userData = userResponse.data;
+                    localStorage.setItem("user_id", userData.id);
+                    localStorage.setItem("email", userData.email);
+                    localStorage.setItem("name", userData.name);
+                    localStorage.setItem("is_staff", userData.is_staff ? "true" : "false");
+                    localStorage.setItem("is_active", userData.is_active ? "true" : "false");
+
+                    setUser(userData);
+                    return { code: 200, data: userData };
+                }
             }
-            return response;
+            return tokenResponse;
         } catch (err) {
-            console.error("Login error:", err);
-            return err.response ? err.response.data : { code: 500, msg: "未知错误" };
+            console.error(t("loginError"), err);
+            return err.response ? err.response.data : { code: 500, msg: t("unknownError") };
         }
     };
 
@@ -44,11 +66,22 @@ export const AuthProvider = ({ children }) => {
             });
             if (response.code === 201 && response.data) {
                 return await login(email, password);
+            } else if (response.code === 400) {
+                if (response.msg && response.msg.email) {
+                    throw new Error(t("emailAlreadyExists"));
+                } else {
+                    throw new Error(response.msg || t("registrationFailed"));
+                }
             } else {
-                throw new Error(response.msg || "注册失败");
+                throw new Error(t("registrationFailed"));
             }
         } catch (err) {
-            toast.error(err.message);
+            if (err.response && err.response.data) {
+                const responseData = err.response.data;
+                if (responseData.msg && responseData.msg.email) {
+                    throw new Error(t("emailAlreadyExists"));
+                }
+            }
             throw err;
         }
     };
@@ -56,8 +89,12 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user_id");
+        localStorage.removeItem("email");
+        localStorage.removeItem("name");
+        localStorage.removeItem("is_staff");
+        localStorage.removeItem("is_active");
         setUser(null);
-        toast.info("您已成功登出");
+        showToast.info(t("logoutSuccess"));
     };
 
     const getCurrentUser = () => {
@@ -67,14 +104,22 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             const token = localStorage.getItem("token");
-            const userId = localStorage.getItem("user_id");
-            if (token && userId) {
+            if (token) {
                 try {
-                    // 这里可以添加一个验证 token 的 API 调用
-                    setUser({ id: userId });
+                    const userResponse = await get("/api/customUser/me/", {
+                        headers: {
+                            "Authorization": `Token ${token}`
+                        }
+                    });
+                    if (userResponse.code === 200 && userResponse.data) {
+                        setUser(userResponse.data);
+                    } else {
+                        // 如果获取用户信息失败，清除所有存储的信息
+                        logout();
+                    }
                 } catch (err) {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user_id");
+                    console.error(t("authCheckError"), err);
+                    logout();
                 }
             }
             setLoading(false);

@@ -1,7 +1,8 @@
-import React, { useContext, useState, useRef } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
     Avatar,
     Popper,
@@ -20,16 +21,24 @@ import {
     DirectionsCar,
     Restaurant,
     EventSeat,
+    Assessment,
 } from "@mui/icons-material";
 import GTranslateIcon from '@mui/icons-material/GTranslate';
 
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
+    const [isStaff, setIsStaff] = useState(false);
     const anchorRef = useRef(null);
     const location = useLocation();
     const { t, i18n } = useTranslation();
+
+    useEffect(() => {
+        const staffStatus = localStorage.getItem("is_staff") === "true";
+        setIsStaff(staffStatus);
+    }, [user]);
 
     const handleToggle = () => {
         setOpen((prevOpen) => !prevOpen);
@@ -54,6 +63,7 @@ const Navbar = () => {
     const handleLogout = () => {
         logout();
         setOpen(false);
+        navigate("/");
     };
 
     const isActive = (path) => {
@@ -71,7 +81,7 @@ const Navbar = () => {
         <nav className="bg-white fixed top-0 left-0 right-0 z-50 shadow-sm">
             <div className="container mx-auto flex justify-between items-center py-4 px-6">
                 <Link to="/" className="text-gray-800 text-2xl font-bold">
-                    Travely
+                TravelMate
                 </Link>
                 <div className="flex items-center space-x-6">
                     <ul className="flex space-x-6">
@@ -129,6 +139,17 @@ const Navbar = () => {
                                 {t("restaurants")}
                             </Link>
                         </li>
+                        {isStaff && (
+                            <li>
+                                <Link
+                                    to="/event-log"
+                                    className={`transition duration-300 ${isActive(
+                                        "/event-log"
+                                    )}`}>
+                                    {t("eventLog")}
+                                </Link>
+                            </li>
+                        )}
                     </ul>
                     <button
                         onClick={toggleLanguage}

@@ -15,6 +15,7 @@ import {
     CheckCircleIcon,
     ClipboardDocumentListIcon
 } from '@heroicons/react/24/solid';
+import defaultTourImage from "../assets/images/default-tour.jpg";
 
 const TourDetail = () => {
     const { t } = useTranslation();
@@ -134,7 +135,7 @@ const TourDetail = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-6 mt-6">
                 <button
                     onClick={handleGoBack}
                     className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition duration-300 mr-4"
@@ -148,9 +149,13 @@ const TourDetail = () => {
                     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                         <div className="relative h-96">
                             <img
-                                src={`https://picsum.photos/seed/${tour.id}/800/600`}
+                                src={destination.img_url || defaultTourImage}
                                 alt={tour.name}
                                 className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = defaultTourImage;
+                                }}
                             />
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
                                 <div className="flex items-center text-white">

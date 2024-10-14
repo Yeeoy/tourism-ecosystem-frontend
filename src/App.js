@@ -8,6 +8,7 @@ import { toastConfig } from './utils/toast';
 import './toastStyles.css';
 import './styles/toast.css'; // 添加这一行
 import { useTranslation } from 'react-i18next';
+import EventLog from './pages/EventLog';
 
 function App() {
     const { i18n } = useTranslation();

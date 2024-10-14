@@ -201,7 +201,7 @@ function Events() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">{t('exploreEvents')}</h1>
+            <h1 className="text-4xl font-bold mb-12 mt-8 text-center text-gray-800">{t('exploreEvents')}</h1>
             <div className="mb-8 flex justify-center">
                 <div className="relative w-full max-w-xl">
                     <input

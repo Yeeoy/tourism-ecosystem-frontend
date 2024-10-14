@@ -10,7 +10,7 @@ import {
     MagnifyingGlassIcon,
     TagIcon
 } from '@heroicons/react/24/solid';
-
+import defaultTourImage from "../assets/images/default-tour.jpg";
 const Tours = () => {
     const { t } = useTranslation();
     const [destinations, setDestinations] = useState([]);
@@ -67,7 +67,7 @@ const Tours = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
+            <h1 className="text-4xl font-bold mb-12 mt-8 text-center text-gray-800">
                 {t('exploreTourDestinations')}
             </h1>
             <div className="mb-8 flex justify-center">
@@ -93,9 +93,13 @@ const Tours = () => {
                             <div className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 hover:shadow-xl transform hover:-translate-y-1">
                                 <div className="relative h-64">
                                     <img
-                                        src={`https://picsum.photos/seed/${destination.id}/400/300`}
+                                        src={destination.img_url || defaultTourImage}
                                         alt={destination.name}
                                         className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = defaultTourImage;
+                                        }}
                                     />
                                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
                                         <h2 className="text-2xl font-bold text-white mb-1">

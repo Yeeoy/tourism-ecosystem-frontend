@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { StarIcon, MapPinIcon } from '@heroicons/react/24/solid';
-import defaultHotelImage from '../assets/images/default-hotel.png';
+import defaultHotelImage from '../assets/images/default-hotel.jpg';
 
 const HotelCardHome = ({ hotel }) => {
   return (

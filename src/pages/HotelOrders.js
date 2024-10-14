@@ -4,6 +4,7 @@ import { showToast } from '../utils/toast';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CalendarIcon, CurrencyDollarIcon, CheckCircleIcon, XCircleIcon, HomeIcon, BuildingOfficeIcon, TrashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import defaultHotelImage from "../assets/images/default-hotel.jpg";
 
 const HotelOrders = () => {
     const { t } = useTranslation();
