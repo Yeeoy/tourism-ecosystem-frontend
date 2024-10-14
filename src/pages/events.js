@@ -12,7 +12,8 @@ import {
     TicketIcon,
     TagIcon,
     MagnifyingGlassIcon,
-    LockClosedIcon
+    LockClosedIcon,
+    CheckCircleIcon
 } from "@heroicons/react/24/solid";
 import { AuthContext } from "../context/authContext";
 
@@ -29,6 +30,7 @@ function Events() {
     const [searchTerm, setSearchTerm] = useState("");
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
+    const [registrationComplete, setRegistrationComplete] = useState(false);
 
     useEffect(() => {
         fetchEvents();
@@ -170,7 +172,7 @@ function Events() {
             if (response.code === 201 && response.data) {
                 setBookingStatus(prev => ({ ...prev, [eventId]: 'success' }));
                 showToast.success(t('registrationSuccess'));
-                // 可以在这里添加其他成功后的逻辑，比如更新UI或重新获取数据
+                setRegistrationComplete(true);
             } else {
                 throw new Error(response.msg || t('registrationFailed'));
             }
@@ -178,6 +180,13 @@ function Events() {
             setBookingStatus(prev => ({ ...prev, [eventId]: 'error' }));
             showToast.error(err.message || t('registrationFailed'));
         }
+    };
+
+    const handleResetRegistration = () => {
+        setRegistrationComplete(false);
+        setSelectedEvent(null);
+        setParticipants({});
+        setPrices({});
     };
 
     const handleGoBack = () => {
@@ -212,7 +221,7 @@ function Events() {
                     const isSelected = selectedEvent === event.id;
 
                     return (
-                        <div key={event.id} className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 hover:shadow-xl">
+                        <div key={event.id} className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 hover:shadow-xl relative">
                             <div className="bg-gradient-to-r from-gray-700 to-gray-900 p-4">
                                 <h2 className="text-2xl font-bold text-white">{event.name}</h2>
                             </div>
@@ -373,6 +382,19 @@ function Events() {
                                     </div>
                                 )}
                             </div>
+                            {/* 添加遮罩层 */}
+                            {registrationComplete && isSelected && (
+                                <div className="absolute inset-0 bg-gray-900 bg-opacity-50 flex flex-col items-center justify-center rounded-lg transition-opacity duration-300 ease-in-out">
+                                    <CheckCircleIcon className="h-16 w-16 text-green-500 mb-4" />
+                                    <p className="text-white text-xl font-bold mb-4">{t("registrationComplete")}</p>
+                                    <button
+                                        onClick={handleResetRegistration}
+                                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+                                    >
+                                        {t("registerAgain")}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     );
                 })}

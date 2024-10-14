@@ -1,27 +1,28 @@
-import { toast } from 'react-toastify';
+import { toast, Bounce, Slide, Zoom, Flip } from 'react-toastify';
 
 export const toastConfig = {
-  position: "bottom-right",
-  autoClose: 3000,
+  transition: Slide,
+  position: "top-right",
+  autoClose: 1000,
   hideProgressBar: true,
   closeOnClick: true,
-  pauseOnHover: true,
-  draggable: true,
+  pauseOnHover: false,
+  draggable: false,
   newestOnTop: false,
   rtl: false,
-  pauseOnFocusLoss: true
+  pauseOnFocusLoss: false,
+  className: 'custom-toast-container',
 };
 
 const commonStyle = {
   fontSize: '16px',
   fontWeight: 'bold',
   background: '#ffffff',
-  color: '#000000',  // 确保文字颜色为黑色
+  color: '#000000',
   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
   borderLeft: '4px solid',
-  zIndex: 9999,
-  padding: '12px 16px',  // 增加内边距
-  lineHeight: '1.5',  // 增加行高
+  padding: '12px 16px',
+  lineHeight: '1.5',
 };
 
 export const showToast = {

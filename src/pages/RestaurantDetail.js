@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { get, post } from "../utils/api";
-import { toast } from "react-toastify";
+import { showToast } from "../utils/toast";
+import { useTranslation } from 'react-i18next';
 import { AuthContext } from "../context/authContext";
 import {
     MapPinIcon,
@@ -16,6 +17,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 const RestaurantDetail = () => {
+    const { t } = useTranslation();
     const [restaurant, setRestaurant] = useState(null);
     const [menu, setMenu] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,11 +27,9 @@ const RestaurantDetail = () => {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
 
-    // 设置默认的预订日期为今天
     const today = new Date().toISOString().split("T")[0];
     const [reservationDate, setReservationDate] = useState(today);
 
-    // 设置默认的预订时间为现在
     const now = new Date();
     const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
         now.getMinutes()
@@ -55,10 +55,10 @@ const RestaurantDetail = () => {
             if (response.code === 200 && response.data) {
                 setRestaurant(response.data);
             } else {
-                throw new Error(response.msg || "获取餐厅详情失败");
+                throw new Error(response.msg || t("failedToGetRestaurantDetails"));
             }
         } catch (err) {
-            toast.error(err.message || "获取餐厅详情失败");
+            showToast.error(err.message || t("failedToGetRestaurantDetails"));
         } finally {
             setLoading(false);
         }
@@ -72,11 +72,11 @@ const RestaurantDetail = () => {
             if (response.code === 200 && response.data) {
                 setMenu(response.data);
             } else {
-                throw new Error(response.msg || "获取菜单失败");
+                throw new Error(response.msg || t("failedToGetMenu"));
             }
         } catch (err) {
-            console.error("获取菜单失败:", err);
-            toast.error("获取菜单失败");
+            console.error(t("failedToGetMenu"), err);
+            showToast.error(t("failedToGetMenu"));
         }
     };
 
@@ -101,11 +101,11 @@ const RestaurantDetail = () => {
             if (response.code === 200 && response.data) {
                 setTotalPrice(response.data.total_price);
             } else {
-                throw new Error(response.msg || "计算价格失败");
+                throw new Error(response.msg || t("failedToCalculatePrice"));
             }
         } catch (err) {
-            console.error("计算价格失败:", err);
-            toast.error("计算价格失败");
+            console.error(t("failedToCalculatePrice"), err);
+            showToast.error(t("failedToCalculatePrice"));
         }
     };
 
@@ -133,7 +133,7 @@ const RestaurantDetail = () => {
 
     const handleConfirmOrder = async () => {
         if (!user) {
-            toast.error("请先登录后再下单");
+            showToast.error(t("pleaseLoginToOrder"));
             return;
         }
 
@@ -145,7 +145,7 @@ const RestaurantDetail = () => {
             }));
 
         if (orderItems.length === 0) {
-            toast.error("请至少选择一个菜品");
+            showToast.error(t("pleaseSelectAtLeastOneItem"));
             return;
         }
 
@@ -165,14 +165,14 @@ const RestaurantDetail = () => {
                 orderData
             );
             if (response.code === 201 && response.data) {
-                toast.success("订单已成功提交!");
+                showToast.success(t("orderSubmittedSuccessfully"));
                 setSelectedItems({});
                 setTotalPrice(0);
             } else {
-                throw new Error(response.msg || "提交订单失败");
+                throw new Error(response.msg || t("failedToSubmitOrder"));
             }
         } catch (err) {
-            toast.error(err.message || "提交订单失败，请稍后重试");
+            showToast.error(err.message || t("failedToSubmitOrder"));
         }
     };
 
@@ -181,12 +181,12 @@ const RestaurantDetail = () => {
 
     const handleReservation = async () => {
         if (!user) {
-            toast.error("请先登录后再预订");
+            showToast.error(t("pleaseLoginToReserve"));
             return;
         }
 
         if (isReservationEmpty) {
-            toast.error("请填写所有预订信息");
+            showToast.error(t("pleaseCompleteAllReservationFields"));
             return;
         }
 
@@ -205,13 +205,13 @@ const RestaurantDetail = () => {
                 reservationData
             );
             if (response.code === 201 && response.data) {
-                toast.success("预订成功!");
+                showToast.success(t("reservationSuccessful"));
                 setReservationComplete(true);
             } else {
-                throw new Error(response.msg || "预订失败");
+                throw new Error(response.msg || t("reservationFailed"));
             }
         } catch (err) {
-            toast.error(err.message || "预订失败，请稍后重试");
+            showToast.error(err.message || t("reservationFailed"));
         }
     };
 
@@ -231,7 +231,7 @@ const RestaurantDetail = () => {
     }
 
     if (!restaurant) {
-        return <div className="text-center mt-8">未找到餐厅信息</div>;
+        return <div className="text-center mt-8">{t("restaurantNotFound")}</div>;
     }
 
     return (
@@ -268,7 +268,7 @@ const RestaurantDetail = () => {
                                     <ClockIcon className="h-8 w-8 text-blue-500 mr-3" />
                                     <div>
                                         <h3 className="font-semibold">
-                                            营业时间
+                                            {t("openingHours")}
                                         </h3>
                                         <p>{restaurant.opening_hours}</p>
                                     </div>
@@ -277,7 +277,7 @@ const RestaurantDetail = () => {
                                     <PhoneIcon className="h-8 w-8 text-green-500 mr-3" />
                                     <div>
                                         <h3 className="font-semibold">
-                                            联系方式
+                                            {t("contactInfo")}
                                         </h3>
                                         <p>{restaurant.contact_info}</p>
                                     </div>
@@ -286,7 +286,7 @@ const RestaurantDetail = () => {
                             {menu.length > 0 && (
                                 <div>
                                     <h3 className="text-xl font-semibold mb-4">
-                                        菜单
+                                        {t("menu")}
                                     </h3>
                                     <div className="space-y-4">
                                         {menu.map((item) => (
@@ -301,7 +301,7 @@ const RestaurantDetail = () => {
                                                         {item.description}
                                                     </p>
                                                     <p className="text-lg font-bold text-blue-600">
-                                                        ¥{item.price}
+                                                        {t("currency")}{item.price}
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center">
@@ -336,7 +336,7 @@ const RestaurantDetail = () => {
                             )}
                             {menu.length === 0 && (
                                 <div className="text-center text-gray-600 py-8">
-                                    <p>抱歉,该餐厅暂时没有可用的菜单。</p>
+                                    <p>{t("noMenuAvailable")}</p>
                                 </div>
                             )}
                         </div>
@@ -344,24 +344,23 @@ const RestaurantDetail = () => {
                 </div>
                 <div className="lg:w-1/3">
                     <div className="bg-white shadow-lg rounded-lg p-6 relative overflow-hidden">
-                        {/* 添加过渡动画到遮罩层 */}
                         <div className={`absolute inset-0 bg-gray-900 bg-opacity-50 flex flex-col items-center justify-center rounded-lg transition-opacity duration-300 ease-in-out ${
                             reservationComplete ? 'opacity-100' : 'opacity-0 pointer-events-none'
                         }`}>
                             <CheckCircleIcon className="h-16 w-16 text-green-500 mb-4" />
-                            <p className="text-white text-xl font-bold mb-4">预订已完成</p>
+                            <p className="text-white text-xl font-bold mb-4">{t("reservationComplete")}</p>
                             <button
                                 onClick={handleResetReservation}
                                 className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
                             >
-                                重新预订
+                                {t("reserveAgain")}
                             </button>
                         </div>
-                        <h2 className="text-2xl font-bold mb-4">预订餐桌</h2>
+                        <h2 className="text-2xl font-bold mb-4">{t("tableReservation")}</h2>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
-                                    预订日期
+                                    {t("reservationDate")}
                                 </label>
                                 <input
                                     type="date"
@@ -374,7 +373,7 @@ const RestaurantDetail = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
-                                    预订时间
+                                    {t("reservationTime")}
                                 </label>
                                 <input
                                     type="time"
@@ -387,7 +386,7 @@ const RestaurantDetail = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
-                                    用餐人数
+                                    {t("numberOfGuests")}
                                 </label>
                                 <input
                                     type="number"
@@ -411,13 +410,13 @@ const RestaurantDetail = () => {
                             }`}
                             disabled={isReservationEmpty || reservationComplete}
                         >
-                            {isReservationEmpty ? "请填写预订信息" : "确认预订"}
+                            {isReservationEmpty ? t("pleaseFillReservationInfo") : t("confirmReservation")}
                         </button>
                     </div>
                     {menu.length > 0 && (
                         <div className="bg-white shadow-lg rounded-lg p-6 mt-6">
                             <h2 className="text-2xl font-bold mb-4">
-                                您的订单
+                                {t("yourOrder")}
                             </h2>
                             <div className="mb-4 space-y-2">
                                 {Object.entries(selectedItems).map(
@@ -435,7 +434,7 @@ const RestaurantDetail = () => {
                                                         {quantity}
                                                     </span>
                                                     <span>
-                                                        ¥
+                                                        {t("currency")}
                                                         {(
                                                             parseFloat(
                                                                 item.price
@@ -451,8 +450,8 @@ const RestaurantDetail = () => {
                             </div>
                             <div className="border-t pt-4">
                                 <div className="flex justify-between items-center text-xl font-bold">
-                                    <span>总计</span>
-                                    <span>¥{totalPrice.toFixed(2)}</span>
+                                    <span>{t("total")}</span>
+                                    <span>{t("currency")}{totalPrice.toFixed(2)}</span>
                                 </div>
                             </div>
                             <button
@@ -463,7 +462,7 @@ const RestaurantDetail = () => {
                                 }`}
                                 onClick={handleConfirmOrder}
                                 disabled={isOrderEmpty}>
-                                {isOrderEmpty ? "请选择菜品" : "提交订单"}
+                                {isOrderEmpty ? t("pleaseSelectDishes") : t("submitOrder")}
                             </button>
                         </div>
                     )}

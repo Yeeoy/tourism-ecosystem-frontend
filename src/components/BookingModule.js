@@ -7,6 +7,7 @@ import {
     CalendarIcon,
     UserGroupIcon,
     CurrencyDollarIcon,
+    CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 
 const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
@@ -19,6 +20,7 @@ const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
     const [pricePerNight, setPricePerNight] = useState(0);
     const [numberOfNights, setNumberOfNights] = useState(0);
     const [totalPrice, setTotalPrice] = useState(0);
+    const [bookingComplete, setBookingComplete] = useState(false);
 
     useEffect(() => {
         const today = new Date();
@@ -31,22 +33,23 @@ const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
         if (Object.keys(roomTypes).length > 0) {
             const firstRoomTypeId = Object.keys(roomTypes)[0];
             setSelectedRoomType(firstRoomTypeId);
-            setPricePerNight(roomTypes[firstRoomTypeId].price_per_night);
+            setPricePerNight(parseFloat(roomTypes[firstRoomTypeId].price_per_night) || 0);
         }
     }, [roomTypes]);
 
     useEffect(() => {
         const start = new Date(checkInDate);
         const end = new Date(checkOutDate);
-        const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        const nights = Math.max(0, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
         setNumberOfNights(nights);
-        setTotalPrice(pricePerNight * nights * numberOfRooms);
+        const price = pricePerNight * nights * numberOfRooms;
+        setTotalPrice(isNaN(price) ? 0 : price);
     }, [checkInDate, checkOutDate, pricePerNight, numberOfRooms]);
 
     const handleRoomTypeChange = (e) => {
         const selectedId = e.target.value;
         setSelectedRoomType(selectedId);
-        setPricePerNight(roomTypes[selectedId].price_per_night);
+        setPricePerNight(parseFloat(roomTypes[selectedId].price_per_night) || 0);
     };
 
     const handleRoomNumberChange = (change) => {
@@ -73,6 +76,7 @@ const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
             });
             if (response.code === 201) {
                 showToast.success(t("bookingSuccessful"));
+                setBookingComplete(true);
             } else {
                 throw new Error(response.msg || t("bookingFailed"));
             }
@@ -81,8 +85,18 @@ const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
         }
     };
 
+    const handleResetBooking = () => {
+        setBookingComplete(false);
+        setNumberOfRooms(1);
+        // 重置其他字段如果需要的话
+    };
+
+    const formatPrice = (price) => {
+        return typeof price === 'number' ? price.toFixed(2) : '0.00';
+    };
+
     return (
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 relative">
             <div className="p-6">
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">
                     {t("bookNow")}
@@ -185,7 +199,7 @@ const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
                                 {t("pricePerNight")}:
                             </span>
                             <span className="text-blue-600 font-bold">
-                                ${pricePerNight}
+                                {t("currency")}{formatPrice(pricePerNight)}
                             </span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
@@ -211,17 +225,33 @@ const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
                                 </span>
                                 <span className="text-2xl font-bold text-blue-600">
                                     <CurrencyDollarIcon className="h-8 w-8 inline-block mr-1" />
-                                    ${totalPrice}
+                                    {t("currency")}{formatPrice(totalPrice)}
                                 </span>
                             </div>
                         </div>
                     </div>
                     <button
                         type="submit"
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline w-full transition duration-300 ease-in-out transform hover:scale-105">
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline w-full transition duration-300 ease-in-out transform hover:scale-105"
+                        disabled={bookingComplete}
+                    >
                         {t("bookNow")}
                     </button>
                 </form>
+            </div>
+            
+            {/* Overlay for successful booking */}
+            <div className={`absolute inset-0 bg-gray-900 bg-opacity-50 flex flex-col items-center justify-center rounded-lg transition-opacity duration-300 ease-in-out ${
+                bookingComplete ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}>
+                <CheckCircleIcon className="h-16 w-16 text-green-500 mb-4" />
+                <p className="text-white text-xl font-bold mb-4">{t("bookingComplete")}</p>
+                <button
+                    onClick={handleResetBooking}
+                    className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+                >
+                    {t("bookAgain")}
+                </button>
             </div>
         </div>
     );

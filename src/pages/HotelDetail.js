@@ -101,11 +101,11 @@ const HotelDetail = () => {
     const handleSubmitReview = async (e) => {
         e.preventDefault();
         if (!user) {
-            showToast.error(t("pleaseLoginToComment")); // 使用封装的 toast
+            showToast.error(t("pleaseLoginToComment"));
             return;
         }
         if (newRating === 0) {
-            showToast.error(t("pleaseSelectRating")); // 使用封装的 toast
+            showToast.error(t("pleaseSelectRating"));
             return;
         }
         try {
@@ -117,13 +117,17 @@ const HotelDetail = () => {
                 user: user.id,
             });
             if (response.code === 201 && response.data) {
-                showToast.success(t("reviewSubmitted")); // 使用封装的 toast
-                window.location.reload();
+                showToast.success(t("reviewSubmitted"));
+                // 添加新评论到评论列表
+                setReviews(prevReviews => [response.data, ...prevReviews]);
+                // 重置表单
+                setNewReview("");
+                setNewRating(0);
             } else {
                 throw new Error(response.msg || t("submitReviewFailed"));
             }
         } catch (err) {
-            showToast.error(err.message || t("submitReviewFailed")); // 使用封装的 toast
+            showToast.error(err.message || t("submitReviewFailed"));
         }
     };
 
@@ -133,14 +137,19 @@ const HotelDetail = () => {
                 const response = await del(
                     `/api/accommodation/feedback-review/${reviewId}/`
                 );
-                showToast.success(t("reviewDeleted")); // 使用封装的 toast
-                window.location.reload();
-            } catch (err) {
-                if (err.response && err.response.status === 404) {
-                    showToast.error(t("deleteReviewFailed")); // 使用封装的 toast
+                // 204 状态码表示成功删除，但没有返回内容
+                if (response.status === 204 || response.code === 200) {
+                    showToast.success(t("reviewDeleted"));
+                    // 从评论列表中移除被删除的评论
+                    setReviews(prevReviews => prevReviews.filter(review => review.id !== reviewId));
                 } else {
-                    window.location.reload();
+                    throw new Error(t("deleteReviewFailed"));
                 }
+            } catch (err) {
+                console.error("Error deleting review:", err);
+                // 即使出现错误，也尝试从列表中移除评论
+                setReviews(prevReviews => prevReviews.filter(review => review.id !== reviewId));
+                showToast.error(t("deleteReviewFailed"));
             }
         }
     };

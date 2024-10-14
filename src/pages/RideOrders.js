@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { get, patch, del } from '../utils/api';
-import { toast } from 'react-toastify';
+import { showToast } from '../utils/toast';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CalendarIcon, CurrencyDollarIcon, MapPinIcon, ClockIcon, TrashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 const RideOrders = () => {
+    const { t } = useTranslation();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [providers, setProviders] = useState({});
@@ -16,15 +18,16 @@ const RideOrders = () => {
 
     const fetchOrders = async () => {
         try {
+            setLoading(true);
             const response = await get('/api/transport-services/ride-booking/');
             if (response.code === 200 && response.data) {
                 setOrders(response.data);
                 fetchProviders(response.data);
             } else {
-                throw new Error(response.msg || '获取订单失败');
+                throw new Error(response.msg || t('failedToGetOrders'));
             }
         } catch (err) {
-            toast.error(err.message || '获取订单失败');
+            showToast.error(err.message || t('failedToGetOrders'));
         } finally {
             setLoading(false);
         }
@@ -39,7 +42,7 @@ const RideOrders = () => {
                     return { [id]: response.data.name };
                 }
             } catch (err) {
-                console.error(`获取提供商 ${id} 失败:`, err);
+                console.error(t('failedToGetProvider', { id }), err);
             }
             return null;
         });
@@ -60,12 +63,12 @@ const RideOrders = () => {
                         ? { ...order, booking_status: false } 
                         : order
                 ));
-                toast.success('订单已成功取消');
+                showToast.success(t('orderCancelledSuccessfully'));
             } else {
-                throw new Error(response.msg || '取消订单失败');
+                throw new Error(response.msg || t('failedToCancelOrder'));
             }
         } catch (err) {
-            toast.error(err.message || '取消订单失败');
+            showToast.error(err.message || t('failedToCancelOrder'));
         }
     };
 
@@ -73,9 +76,14 @@ const RideOrders = () => {
         try {
             await del(`/api/transport-services/ride-booking/${orderId}/`);
             setOrders(orders.filter(order => order.id !== orderId));
-            toast.success('订单已成功删除');
+            showToast.success(t('orderDeletedSuccessfully'));
         } catch (err) {
-            toast.error('删除订单失败');
+            console.error(t('errorDeletingOrder'), err);
+            if (err.message === 'Network Error') {
+                showToast.error(t('networkError'));
+            } else {
+                showToast.error(t('failedToDeleteOrder'));
+            }
         }
     };
 
@@ -98,25 +106,25 @@ const RideOrders = () => {
                 >
                     <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
                 </button>
-                <h1 className="text-3xl font-bold text-gray-800">我的乘车订单</h1>
+                <h1 className="text-3xl font-bold text-gray-800">{t('myRideOrders')}</h1>
             </div>
             {orders.length > 0 ? (
                 <div className="bg-white shadow-md rounded-lg overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">提供商 / 路线</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期 / 时间</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">价格</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('provider')} / {t('route')}</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('dateTime')}</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('price')}</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('status')}</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {orders.map((order) => (
                                 <tr key={order.id} className={!order.booking_status ? 'bg-gray-100' : ''}>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{providers[order.provider_id] || '加载中...'}</div>
+                                        <div className="text-sm font-medium text-gray-900">{providers[order.provider_id] || t('loading')}</div>
                                         <div className="text-sm text-gray-500">{order.pickup_location} → {order.drop_off_location}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -137,13 +145,13 @@ const RideOrders = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.booking_status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                            {order.booking_status ? '已确认' : '已取消'}
+                                            {order.booking_status ? t('confirmed') : t('cancelled')}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         {order.booking_status ? (
                                             <button onClick={() => cancelOrder(order.id)} className="text-indigo-600 hover:text-indigo-900">
-                                                取消订单
+                                                {t('cancelOrder')}
                                             </button>
                                         ) : (
                                             <button onClick={() => deleteOrder(order.id)} className="text-red-600 hover:text-red-900">
@@ -158,9 +166,9 @@ const RideOrders = () => {
                 </div>
             ) : (
                 <div className="text-center text-gray-600 bg-white p-8 rounded-lg shadow-md">
-                    <p className="text-xl mb-4">您还没有任何乘车订单。</p>
+                    <p className="text-xl mb-4">{t('noRideOrders')}</p>
                     <a href="/transportation" className="text-blue-500 hover:text-blue-700 transition duration-300">
-                        立即预订乘车 →
+                        {t('bookRideNow')} →
                     </a>
                 </div>
             )}

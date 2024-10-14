@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { get, patch, del } from '../utils/api';
-import { toast } from 'react-toastify';
+import { showToast } from '../utils/toast';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CalendarIcon, ClockIcon, UserGroupIcon, TrashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 const TableReservations = () => {
+    const { t } = useTranslation();
     const [reservations, setReservations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [restaurants, setRestaurants] = useState({});
@@ -21,10 +23,10 @@ const TableReservations = () => {
                 setReservations(response.data);
                 fetchRestaurants(response.data);
             } else {
-                throw new Error(response.msg || '获取预订失败');
+                throw new Error(response.msg || t('failedToGetReservations'));
             }
         } catch (err) {
-            toast.error(err.message || '获取预订失败');
+            showToast.error(err.message || t('failedToGetReservations'));
         } finally {
             setLoading(false);
         }
@@ -39,7 +41,7 @@ const TableReservations = () => {
                     return { [id]: response.data.name };
                 }
             } catch (err) {
-                console.error(`获取餐厅 ${id} 失败:`, err);
+                console.error(t('failedToGetRestaurant', { id }), err);
             }
             return null;
         });
@@ -60,12 +62,12 @@ const TableReservations = () => {
                         ? { ...reservation, reservation_status: "Canceled" } 
                         : reservation
                 ));
-                toast.success('预订已成功取消');
+                showToast.success(t('reservationCancelledSuccessfully'));
             } else {
-                throw new Error(response.msg || '取消预订失败');
+                throw new Error(response.msg || t('failedToCancelReservation'));
             }
         } catch (err) {
-            toast.error(err.message || '取消预订失败');
+            showToast.error(err.message || t('failedToCancelReservation'));
         }
     };
 
@@ -73,9 +75,9 @@ const TableReservations = () => {
         try {
             await del(`/api/dining/table-reservations/${reservationId}/`);
             setReservations(reservations.filter(reservation => reservation.id !== reservationId));
-            toast.success('预订已成功删除');
+            showToast.success(t('reservationDeletedSuccessfully'));
         } catch (err) {
-            toast.error('删除预订失败');
+            showToast.error(t('failedToDeleteReservation'));
         }
     };
 
@@ -98,25 +100,25 @@ const TableReservations = () => {
                 >
                     <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
                 </button>
-                <h1 className="text-3xl font-bold text-gray-800">我的餐厅预订</h1>
+                <h1 className="text-3xl font-bold text-gray-800">{t('myTableReservations')}</h1>
             </div>
             {reservations.length > 0 ? (
                 <div className="bg-white shadow-md rounded-lg overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">餐厅</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期 / 时间</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">人数</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('restaurant')}</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('dateTime')}</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('guests')}</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('status')}</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {reservations.map((reservation) => (
                                 <tr key={reservation.id} className={reservation.reservation_status === 'Canceled' ? 'bg-gray-100' : ''}>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{restaurants[reservation.restaurant] || '加载中...'}</div>
+                                        <div className="text-sm font-medium text-gray-900">{restaurants[reservation.restaurant] || t('loading')}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center text-sm text-gray-900">
@@ -138,13 +140,13 @@ const TableReservations = () => {
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                             reservation.reservation_status === 'Confirmed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                         }`}>
-                                            {reservation.reservation_status === 'Confirmed' ? '已确认' : '已取消'}
+                                            {reservation.reservation_status === 'Confirmed' ? t('confirmed') : t('cancelled')}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         {reservation.reservation_status === 'Confirmed' ? (
                                             <button onClick={() => cancelReservation(reservation.id)} className="text-indigo-600 hover:text-indigo-900">
-                                                取消预订
+                                                {t('cancelReservation')}
                                             </button>
                                         ) : (
                                             <button onClick={() => deleteReservation(reservation.id)} className="text-red-600 hover:text-red-900">
@@ -159,9 +161,9 @@ const TableReservations = () => {
                 </div>
             ) : (
                 <div className="text-center text-gray-600 bg-white p-8 rounded-lg shadow-md">
-                    <p className="text-xl mb-4">您还没有任何餐厅预订。</p>
+                    <p className="text-xl mb-4">{t('noTableReservations')}</p>
                     <a href="/restaurants" className="text-blue-500 hover:text-blue-700 transition duration-300">
-                        立即预订餐厅 →
+                        {t('reserveTableNow')} →
                     </a>
                 </div>
             )}

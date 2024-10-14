@@ -11,7 +11,9 @@ import {
     CurrencyDollarIcon,
     CalendarIcon,
     UserIcon,
-    ArrowLeftIcon
+    ArrowLeftIcon,
+    CheckCircleIcon,
+    ClipboardDocumentListIcon
 } from '@heroicons/react/24/solid';
 
 const TourDetail = () => {
@@ -65,18 +67,31 @@ const TourDetail = () => {
 
     const checkBookingStatus = async () => {
         try {
-            const response = await get(`/api/tourism-info/tour-bookings/${id}/`);
+            const response = await get('/api/tourism-info/tour-bookings/');
             if (response.code === 200 && response.data) {
-                setIsBooked(response.data.booking_status);
+                const userBookings = response.data.filter(booking => 
+                    booking.user_id === parseInt(user.id) && 
+                    booking.tour_id === parseInt(id) &&
+                    booking.booking_status === true
+                );
+                setIsBooked(userBookings.length > 0);
+            } else {
+                throw new Error(response.msg || t('failedToCheckBookingStatus'));
             }
         } catch (err) {
             console.error(t('failedToCheckBookingStatus'), err);
+            showToast.error(t('failedToCheckBookingStatus'));
         }
     };
 
     const handleBooking = async () => {
         if (!user) {
             showToast.error(t('pleaseLoginToBook'));
+            return;
+        }
+
+        if (isBooked) {
+            showToast.info(t('alreadyBooked'));
             return;
         }
 
@@ -198,9 +213,19 @@ const TourDetail = () => {
                             <p className="text-gray-700">{tour.tour_type}</p>
                         </div>
                         {isBooked ? (
-                            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                                <strong className="font-bold">{t('booked')}！</strong>
-                                <span className="block sm:inline"> {t('bookingSuccessMessage')}</span>
+                            <div>
+                                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                                    <CheckCircleIcon className="h-6 w-6 inline-block mr-2" />
+                                    <strong className="font-bold">{t('booked')}！</strong>
+                                    <span className="block sm:inline"> {t('bookingSuccessMessage')}</span>
+                                </div>
+                                <button 
+                                    onClick={() => navigate('/tour-orders')} // 假设tour orders页面的路由是'/tour-orders'
+                                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+                                >
+                                    <ClipboardDocumentListIcon className="h-5 w-5 inline-block mr-2" />
+                                    {t('viewTourOrder')}
+                                </button>
                             </div>
                         ) : (
                             <button 

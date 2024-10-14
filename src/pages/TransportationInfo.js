@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { get, post } from "../utils/api";
-import { toast } from "react-toastify";
+import { showToast } from "../utils/toast";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "../context/authContext";
 import {
     TruckIcon,
@@ -17,6 +18,7 @@ import {
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 
 const TransportationInfo = () => {
+    const { t } = useTranslation();
     const [providers, setProviders] = useState([]);
     const [routePlans, setRoutePlans] = useState([]);
     const [trafficUpdates, setTrafficUpdates] = useState([]);
@@ -32,8 +34,9 @@ const TransportationInfo = () => {
     const [bookingTime, setBookingTime] = useState(
         new Date().toTimeString().slice(0, 5)
     );
-    const [bookingStatus, setBookingStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
+    const [bookingStatus, setBookingStatus] = useState("idle"); // 'idle', 'loading', 'success', 'error'
     const [isBooked, setIsBooked] = useState(false);
+    const [bookingComplete, setBookingComplete] = useState(false);
     const { user } = useContext(AuthContext);
 
     useEffect(() => {
@@ -68,7 +71,7 @@ const TransportationInfo = () => {
             if (routesRes.code === 200) setRoutePlans(routesRes.data);
             if (updatesRes.code === 200) setTrafficUpdates(updatesRes.data);
         } catch (error) {
-            toast.error("获取交通信息失败");
+            showToast.error(t("failedToFetchTransportationInfo"));
         } finally {
             setLoading(false);
         }
@@ -90,39 +93,56 @@ const TransportationInfo = () => {
 
     const handleBooking = async () => {
         if (!user) {
-            toast.error('请先登录后再预订');
+            showToast.error(t("pleaseLoginToBook"));
             return;
         }
 
         if (!selectedProvider || !selectedRoute) {
-            toast.error('请选择交通提供商和路线');
+            showToast.error(t("pleaseSelectProviderAndRoute"));
             return;
         }
 
-        setBookingStatus('loading');
+        setBookingStatus("loading");
         try {
-            const response = await post('/api/transport-services/ride-booking/', {
-                pickup_location: selectedRoute.start_location,
-                drop_off_location: selectedRoute.end_location,
-                ride_date: bookingDate,
-                pickup_time: bookingTime,
-                estimated_fare: (parseFloat(selectedProvider.base_fare) + parseFloat(selectedRoute.distance) * parseFloat(selectedProvider.price_per_km)).toFixed(2),
-                booking_status: true,
-                user: user.id,
-                provider_id: selectedProvider.id
-            });
+            const response = await post(
+                "/api/transport-services/ride-booking/",
+                {
+                    pickup_location: selectedRoute.start_location,
+                    drop_off_location: selectedRoute.end_location,
+                    ride_date: bookingDate,
+                    pickup_time: bookingTime,
+                    estimated_fare: (
+                        parseFloat(selectedProvider.base_fare) +
+                        parseFloat(selectedRoute.distance) *
+                            parseFloat(selectedProvider.price_per_km)
+                    ).toFixed(2),
+                    booking_status: true,
+                    user: user.id,
+                    provider_id: selectedProvider.id,
+                }
+            );
 
             if (response.code === 201 && response.data) {
-                setBookingStatus('success');
+                setBookingStatus("success");
                 setIsBooked(true);
-                toast.success('预订成功！');
+                setBookingComplete(true);
+                showToast.success(t("bookingSuccessful"));
             } else {
-                throw new Error(response.msg || '预订失败');
+                throw new Error(response.msg || t("bookingFailed"));
             }
         } catch (err) {
-            setBookingStatus('error');
-            toast.error(err.message || '预订失败，请稍后重试');
+            setBookingStatus("error");
+            showToast.error(err.message || t("bookingFailed"));
         }
+    };
+
+    const handleResetBooking = () => {
+        setBookingComplete(false);
+        setIsBooked(false);
+        setSelectedProvider(null);
+        setSelectedRoute(null);
+        setBookingDate(new Date().toISOString().split("T")[0]);
+        setBookingTime(new Date().toTimeString().slice(0, 5));
     };
 
     const filteredProviders = providers.filter(
@@ -152,7 +172,7 @@ const TransportationInfo = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
-                交通信息
+                {t("transportationInfo")}
             </h1>
 
             <div className="flex flex-col lg:flex-row gap-8">
@@ -161,7 +181,7 @@ const TransportationInfo = () => {
                     <div className="relative mb-4">
                         <input
                             type="text"
-                            placeholder="搜索交通提供商或路线..."
+                            placeholder={t("searchProvidersOrRoutes")}
                             className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -176,19 +196,26 @@ const TransportationInfo = () => {
                                 <CSSTransition
                                     key={currentUpdateIndex}
                                     timeout={500}
-                                    classNames="fade"
-                                >
+                                    classNames="fade">
                                     <div className="absolute w-full">
                                         {trafficUpdates.length > 0 && (
                                             <div className="flex justify-between items-center p-2 bg-red-100 rounded-lg border border-red-200 h-10">
                                                 <div className="flex items-center flex-1 mr-4">
                                                     <ExclamationTriangleIcon className="h-5 w-5 text-red-500 mr-2" />
                                                     <p className="font-semibold text-gray-800 truncate">
-                                                        {trafficUpdates[currentUpdateIndex].update_message}
+                                                        {
+                                                            trafficUpdates[
+                                                                currentUpdateIndex
+                                                            ].update_message
+                                                        }
                                                     </p>
                                                 </div>
                                                 <p className="text-sm text-black-600 font-bold whitespace-nowrap  px-2 py-1 rounded">
-                                                    {new Date(trafficUpdates[currentUpdateIndex].update_time).toLocaleString()}
+                                                    {new Date(
+                                                        trafficUpdates[
+                                                            currentUpdateIndex
+                                                        ].update_time
+                                                    ).toLocaleString()}
                                                 </p>
                                             </div>
                                         )}
@@ -203,7 +230,7 @@ const TransportationInfo = () => {
                         <div className="bg-white shadow-lg rounded-lg p-6">
                             <h2 className="text-2xl font-semibold mb-4 flex items-center text-gray-800">
                                 <TruckIcon className="h-6 w-6 mr-2 text-blue-500" />
-                                交通提供商
+                                {t("transportationProviders")}
                             </h2>
                             <div className="space-y-4">
                                 {filteredProviders.map((provider) => (
@@ -228,10 +255,12 @@ const TransportationInfo = () => {
                                             </div>
                                             <div className="text-right">
                                                 <p className="font-semibold text-lg text-green-600">
-                                                    ¥{provider.base_fare}
+                                                    {t("currency")}
+                                                    {provider.base_fare}
                                                 </p>
                                                 <p className="text-sm text-gray-600">
-                                                    ¥{provider.price_per_km}/km
+                                                    {t("currency")}
+                                                    {provider.price_per_km}/km
                                                 </p>
                                             </div>
                                         </div>
@@ -239,7 +268,7 @@ const TransportationInfo = () => {
                                             provider.id && (
                                             <div className="mt-2 text-sm text-blue-500 flex items-center">
                                                 <CheckCircleIcon className="h-5 w-5 mr-1" />
-                                                已选择
+                                                {t("selected")}
                                             </div>
                                         )}
                                     </div>
@@ -251,7 +280,7 @@ const TransportationInfo = () => {
                         <div className="bg-white shadow-lg rounded-lg p-6">
                             <h2 className="text-2xl font-semibold mb-4 flex items-center text-gray-800">
                                 <MapPinIcon className="h-6 w-6 mr-2 text-green-500" />
-                                路线规划
+                                {t("routePlanning")}
                             </h2>
                             <div className="space-y-4">
                                 {filteredRoutes.map((route) => (
@@ -286,7 +315,7 @@ const TransportationInfo = () => {
                                         {selectedRoute?.id === route.id && (
                                             <div className="mt-2 text-sm text-green-500 flex items-center">
                                                 <CheckCircleIcon className="h-5 w-5 mr-1" />
-                                                已选择
+                                                {t("selected")}
                                             </div>
                                         )}
                                     </div>
@@ -298,82 +327,158 @@ const TransportationInfo = () => {
 
                 <div className="lg:w-1/4">
                     {/* 乘车预订 */}
-                    <div className="sticky top-20 bg-white shadow-lg rounded-lg p-6">
+                    <div className="sticky top-20 bg-white shadow-lg rounded-lg p-6 relative">
                         <h2 className="text-2xl font-semibold mb-4 flex items-center text-gray-800">
                             <CalendarIcon className="h-6 w-6 mr-2 text-purple-500" />
-                            乘车预订
+                            {t("rideBooking")}
                         </h2>
                         {selectedProvider && selectedRoute ? (
                             <div className="space-y-4">
                                 <div className="bg-blue-50 p-4 rounded-lg">
-                                    <h3 className="font-bold text-xl text-blue-700 mb-2">{selectedProvider.name}</h3>
-                                    <p className="text-sm text-blue-600">{selectedProvider.service_type}</p>
+                                    <h3 className="font-bold text-xl text-blue-700 mb-2">
+                                        {selectedProvider.name}
+                                    </h3>
+                                    <p className="text-sm text-blue-600">
+                                        {selectedProvider.service_type}
+                                    </p>
                                 </div>
                                 <div className="bg-green-50 p-4 rounded-lg">
-                                    <h3 className="font-bold text-lg text-green-700 mb-2">路线信息</h3>
+                                    <h3 className="font-bold text-lg text-green-700 mb-2">
+                                        {t("routeInfo")}
+                                    </h3>
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-semibold text-green-600">{selectedRoute.start_location}</p>
+                                            <p className="text-sm font-semibold text-green-600">
+                                                {selectedRoute.start_location}
+                                            </p>
                                             <ArrowRightIcon className="h-4 w-4 text-green-500 my-1" />
-                                            <p className="text-sm font-semibold text-green-600">{selectedRoute.end_location}</p>
+                                            <p className="text-sm font-semibold text-green-600">
+                                                {selectedRoute.end_location}
+                                            </p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-lg font-bold text-green-600">{selectedRoute.distance} km</p>
-                                            <p className="text-sm text-green-600">{selectedRoute.estimated_time} 分钟</p>
+                                            <p className="text-lg font-bold text-green-600">
+                                                {selectedRoute.distance} km
+                                            </p>
+                                            <p className="text-sm text-green-600">
+                                                {selectedRoute.estimated_time}{" "}
+                                                分钟
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="bg-yellow-50 p-4 rounded-lg">
-                                    <h3 className="font-bold text-lg text-yellow-700 mb-2">费用估算</h3>
+                                    <h3 className="font-bold text-lg text-yellow-700 mb-2">
+                                        {t("costEstimate")}
+                                    </h3>
                                     <div className="flex justify-between items-center">
-                                        <p className="text-sm text-yellow-600">总计</p>
+                                        <p className="text-sm text-yellow-600">
+                                            {t("total")}
+                                        </p>
                                         <p className="text-2xl font-bold text-yellow-600">
-                                            ¥{(parseFloat(selectedProvider.base_fare) + parseFloat(selectedRoute.distance) * parseFloat(selectedProvider.price_per_km)).toFixed(2)}
+                                            {t("currency")}
+                                            {(
+                                                parseFloat(
+                                                    selectedProvider.base_fare
+                                                ) +
+                                                parseFloat(
+                                                    selectedRoute.distance
+                                                ) *
+                                                    parseFloat(
+                                                        selectedProvider.price_per_km
+                                                    )
+                                            ).toFixed(2)}
                                         </p>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-2">
-                                        基础费用: ¥{selectedProvider.base_fare} + 里程费: ¥{(parseFloat(selectedRoute.distance) * parseFloat(selectedProvider.price_per_km)).toFixed(2)}
+                                        {t("baseFare")}: {t("currency")}
+                                        {selectedProvider.base_fare} +{" "}
+                                        {t("mileageFee")}: {t("currency")}
+                                        {(
+                                            parseFloat(selectedRoute.distance) *
+                                            parseFloat(
+                                                selectedProvider.price_per_km
+                                            )
+                                        ).toFixed(2)}
                                     </p>
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="font-bold text-lg text-gray-700">预订时间</h3>
+                                    <h3 className="font-bold text-lg text-gray-700">
+                                        {t("bookingTime")}
+                                    </h3>
                                     <div className="flex space-x-2">
                                         <input
                                             type="date"
                                             value={bookingDate}
-                                            onChange={(e) => setBookingDate(e.target.value)}
+                                            onChange={(e) =>
+                                                setBookingDate(e.target.value)
+                                            }
                                             className="flex-1 p-2 border rounded-md"
                                         />
                                         <input
                                             type="time"
                                             value={bookingTime}
-                                            onChange={(e) => setBookingTime(e.target.value)}
+                                            onChange={(e) =>
+                                                setBookingTime(e.target.value)
+                                            }
                                             className="flex-1 p-2 border rounded-md"
                                         />
                                     </div>
                                 </div>
                                 {isBooked ? (
-                                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                                        <strong className="font-bold">已预订！</strong>
-                                        <span className="block sm:inline"> 您已成功预订此行程。</span>
+                                    <div
+                                        className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+                                        role="alert">
+                                        <strong className="font-bold">
+                                            {t("booked")}！
+                                        </strong>
+                                        <span className="block sm:inline">
+                                            {" "}
+                                            {t("bookingSuccessMessage")}
+                                        </span>
                                     </div>
                                 ) : (
                                     <button
                                         onClick={handleBooking}
-                                        disabled={bookingStatus === 'loading' || isBooked}
+                                        disabled={
+                                            bookingStatus === "loading" ||
+                                            isBooked
+                                        }
                                         className={`w-full ${
-                                            bookingStatus === 'loading' || isBooked
-                                                ? 'bg-gray-400 cursor-not-allowed' 
-                                                : 'bg-blue-500 hover:bg-blue-600'
-                                        } text-white py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center text-lg font-semibold`}
-                                    >
-                                        {bookingStatus === 'loading' ? '预订中...' : '确认预订'}
+                                            bookingStatus === "loading" ||
+                                            isBooked
+                                                ? "bg-gray-400 cursor-not-allowed"
+                                                : "bg-blue-500 hover:bg-blue-600"
+                                        } text-white py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center text-lg font-semibold`}>
+                                        {bookingStatus === "loading"
+                                            ? t("booking")
+                                            : t("confirmBooking")}
                                     </button>
                                 )}
                             </div>
                         ) : (
-                            <p className="text-gray-600">请先选择交通提供商和路线</p>
+                            <p className="text-gray-600">
+                                {t("pleaseSelectProviderAndRoute")}
+                            </p>
                         )}
+
+                        {/* Overlay for successful booking */}
+                        <div
+                            className={`absolute inset-0 bg-gray-900 bg-opacity-50 flex flex-col items-center justify-center rounded-lg transition-opacity duration-300 ease-in-out ${
+                                bookingComplete
+                                    ? "opacity-100"
+                                    : "opacity-0 pointer-events-none"
+                            }`}>
+                            <CheckCircleIcon className="h-16 w-16 text-green-500 mb-4" />
+                            <p className="text-white text-xl font-bold mb-4">
+                                {t("bookingComplete")}
+                            </p>
+                            <button
+                                onClick={handleResetBooking}
+                                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300">
+                                {t("bookAgain")}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
