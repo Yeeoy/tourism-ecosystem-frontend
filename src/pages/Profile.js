@@ -59,24 +59,24 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-12 mt-8 text-center text-gray-800">{t('profile')}</h1>
-      <div className="max-w-md mx-auto bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="p-6">
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+    <div className="container mx-auto px-4 py-12 max-w-3xl">
+      <h1 className="text-4xl font-extrabold mb-10 text-center text-gray-800">{t('profile')}</h1>
+      <div className="bg-white shadow-lg rounded-xl overflow-hidden">
+        <div className="p-8">
+          <div className="mb-8">
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
               {t('email')}
             </label>
-            <div className="flex items-center">
-              <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-2" />
+            <div className="flex items-center bg-gray-100 rounded-lg p-2">
+              <EnvelopeIcon className="h-6 w-6 text-gray-500 mr-3" />
               <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="bg-transparent w-full text-gray-700 focus:outline-none"
                 id="email"
                 type="email"
                 value={email}
@@ -84,34 +84,34 @@ const Profile = () => {
               />
             </div>
           </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+          <div className="mb-8">
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="name">
               {t('name')}
             </label>
-            <div className="flex items-center">
-              <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
+            <div className="flex items-center bg-gray-100 rounded-lg p-2">
+              <UserIcon className="h-6 w-6 text-gray-500 mr-3" />
               {isEditing ? (
                 <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="bg-transparent w-full text-gray-700 focus:outline-none"
                   id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               ) : (
-                <p className="py-2 px-3 text-gray-700">{name}</p>
+                <p className="text-gray-700">{name}</p>
               )}
             </div>
           </div>
           {isEditing && (
-            <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+            <div className="mb-8">
+              <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
                 {t('newPassword')}
               </label>
-              <div className="flex items-center">
-                <LockClosedIcon className="h-5 w-5 text-gray-400 mr-2" />
+              <div className="flex items-center bg-gray-100 rounded-lg p-2">
+                <LockClosedIcon className="h-6 w-6 text-gray-500 mr-3" />
                 <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="bg-transparent w-full text-gray-700 focus:outline-none"
                   id="password"
                   type="password"
                   value={password}
@@ -121,11 +121,11 @@ const Profile = () => {
               </div>
             </div>
           )}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center mt-10">
             {isEditing ? (
               <>
                 <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center mr-4"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline flex items-center mr-4 transition duration-300"
                   type="button"
                   onClick={handleSubmit}
                 >
@@ -133,7 +133,7 @@ const Profile = () => {
                   {t('save')}
                 </button>
                 <button
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
+                  className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline flex items-center transition duration-300"
                   type="button"
                   onClick={() => {
                     setIsEditing(false);
@@ -146,7 +146,7 @@ const Profile = () => {
               </>
             ) : (
               <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline flex items-center transition duration-300"
                 type="button"
                 onClick={() => setIsEditing(true)}
               >
