@@ -33,7 +33,7 @@ const Tours = () => {
     const fetchDestinations = async () => {
         try {
             setLoading(true);
-            const response = await get('/api/tourism-info/destinations/');
+            const response = await get('/api/information-center/destinations/');
             if (response.code === 200 && response.data) {
                 setDestinations(response.data);
                 setFilteredDestinations(response.data);

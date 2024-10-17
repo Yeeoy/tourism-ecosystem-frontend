@@ -19,7 +19,7 @@ const RideOrders = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await get('/api/transport-services/ride-booking/');
+            const response = await get('/api/local-transportation/ride-booking/');
             if (response.code === 200 && response.data) {
                 setOrders(response.data);
                 fetchProviders(response.data);
@@ -37,7 +37,7 @@ const RideOrders = () => {
         const uniqueProviderIds = [...new Set(orders.map(order => order.provider_id))];
         const providerPromises = uniqueProviderIds.map(async (id) => {
             try {
-                const response = await get(`/api/transport-services/transportation-provider/${id}/`);
+                const response = await get(`/api/local-transportation/transportation-provider/${id}/`);
                 if (response.code === 200 && response.data) {
                     return { [id]: response.data.name };
                 }
@@ -54,7 +54,7 @@ const RideOrders = () => {
 
     const cancelOrder = async (orderId) => {
         try {
-            const response = await patch(`/api/transport-services/ride-booking/${orderId}/`, {
+            const response = await patch(`/api/local-transportation/ride-booking/${orderId}/`, {
                 booking_status: false
             });
             if (response.code === 200 && response.data) {
@@ -74,7 +74,7 @@ const RideOrders = () => {
 
     const deleteOrder = async (orderId) => {
         try {
-            await del(`/api/transport-services/ride-booking/${orderId}/`);
+            await del(`/api/local-transportation/ride-booking/${orderId}/`);
             setOrders(orders.filter(order => order.id !== orderId));
             showToast.success(t('orderDeletedSuccessfully'));
         } catch (err) {

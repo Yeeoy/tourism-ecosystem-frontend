@@ -62,9 +62,9 @@ const TransportationInfo = () => {
     const fetchTransportationData = async () => {
         try {
             const [providersRes, routesRes, updatesRes] = await Promise.all([
-                get("/api/transport-services/transportation-provider/"),
-                get("/api/transport-services/route-planning/"),
-                get("/api/transport-services/traffic-update/"),
+                get("/api/local-transportation/transportation-provider/"),
+                get("/api/local-transportation/route-planning/"),
+                get("/api/local-transportation/traffic-update/"),
             ]);
 
             if (providersRes.code === 200) setProviders(providersRes.data);
@@ -105,7 +105,7 @@ const TransportationInfo = () => {
         setBookingStatus("loading");
         try {
             const response = await post(
-                "/api/transport-services/ride-booking/",
+                "/api/local-transportation/ride-booking/",
                 {
                     pickup_location: selectedRoute.start_location,
                     drop_off_location: selectedRoute.end_location,
@@ -117,7 +117,7 @@ const TransportationInfo = () => {
                             parseFloat(selectedProvider.price_per_km)
                     ).toFixed(2),
                     booking_status: true,
-                    user: user.id,
+                    user_id: user.id,
                     provider_id: selectedProvider.id,
                 }
             );

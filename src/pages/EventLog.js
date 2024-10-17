@@ -38,7 +38,7 @@ const EventLog = () => {
     const fetchLogs = async () => {
         setLoading(true);
         try {
-            const response = await get(`/api/customUser/event_logs/?page=${page + 1}&page_size=${rowsPerPage}`);
+            const response = await get(`/api/customUser/event-logs/?page=${page + 1}&page_size=${rowsPerPage}`);
             if (response.code === 200) {
                 setLogs(response.data.results);
                 setTotalCount(response.data.count);
@@ -62,13 +62,16 @@ const EventLog = () => {
 
     const handleDownload = async () => {
         try {
-            const response = await get('/api/customUser/download_csv/', {
+            const response = await get('/api/customUser/event-logs/download-csv/', {
                 responseType: 'blob',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                }
             });
             const url = window.URL.createObjectURL(new Blob([response]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'event_logs.csv');
+            link.setAttribute('download', 'event-logs.csv');
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -89,7 +92,7 @@ const EventLog = () => {
 
     const handleDeleteConfirmed = async () => {
         try {
-            await del('/api/customUser/clear_event_logs/');
+            await del('/api/customUser/event-logs/clear/');
             showToast.success(t('eventLogsCleared'));
             fetchLogs();
         } catch (error) {

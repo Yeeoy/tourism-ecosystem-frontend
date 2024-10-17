@@ -19,7 +19,7 @@ const RestaurantOrders = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await get('/api/dining/online-orders/');
+            const response = await get('/api/restaurant/online-orders/');
             if (response.code === 200 && response.data) {
                 setOrders(response.data);
                 fetchRestaurants(response.data);
@@ -37,7 +37,7 @@ const RestaurantOrders = () => {
         const uniqueRestaurantIds = [...new Set(orders.map(order => order.restaurant))];
         const restaurantPromises = uniqueRestaurantIds.map(async (id) => {
             try {
-                const response = await get(`/api/dining/restaurants/${id}/`);
+                const response = await get(`/api/restaurant/restaurants/${id}/`);
                 if (response.code === 200 && response.data) {
                     return { [id]: response.data.name };
                 }
@@ -54,7 +54,7 @@ const RestaurantOrders = () => {
 
     const cancelOrder = async (orderId) => {
         try {
-            const response = await patch(`/api/dining/online-orders/${orderId}/`, {
+            const response = await patch(`/api/restaurant/online-orders/${orderId}/`, {
                 order_status: "Canceled"
             });
             if (response.code === 200 && response.data) {
@@ -74,7 +74,7 @@ const RestaurantOrders = () => {
 
     const deleteOrder = async (orderId) => {
         try {
-            await del(`/api/dining/online-orders/${orderId}/`);
+            await del(`/api/restaurant/online-orders/${orderId}/`);
             setOrders(orders.filter(order => order.id !== orderId));
             showToast.success(t('orderDeletedSuccessfully'));
         } catch (err) {

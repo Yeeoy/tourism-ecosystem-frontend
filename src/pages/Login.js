@@ -1,9 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
-import { showToast } from "../utils/toast";
 import { useTranslation } from "react-i18next";
 import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
+import { showToast } from "../utils/toast";
 
 const Login = () => {
     const { t } = useTranslation();
@@ -29,31 +29,23 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        try {
-            const response = await login(email, password);
-            if (response.code === 400) {
-                showToast.error(t("invalidCredentials"));
+        const response = await login(email, password);
+        if (response.code === 200) {
+            showToast.success(t("loginSuccess"));
+            if (rememberMe) {
+                localStorage.setItem("rememberedEmail", email);
+                localStorage.setItem("rememberedPassword", password);
+                localStorage.setItem("rememberMe", "true");
             } else {
-                showToast.success(t("loginSuccess"));
-
-                if (rememberMe) {
-                    localStorage.setItem("rememberedEmail", email);
-                    localStorage.setItem("rememberedPassword", password);
-                    localStorage.setItem("rememberMe", "true");
-                } else {
-                    localStorage.removeItem("rememberedEmail");
-                    localStorage.removeItem("rememberedPassword");
-                    localStorage.removeItem("rememberMe");
-                }
-
-                navigate("/");
+                localStorage.removeItem("rememberedEmail");
+                localStorage.removeItem("rememberedPassword");
+                localStorage.removeItem("rememberMe");
             }
-        } catch (err) {
-            console.error(err);
-            showToast.error(t("loginFailed"));
-        } finally {
-            setLoading(false);
+            navigate("/");
+        } else {
+            showToast.error(response.error || t("loginFailed"));
         }
+        setLoading(false);
     };
 
     return (

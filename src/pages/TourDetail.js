@@ -38,7 +38,7 @@ const TourDetail = () => {
     const fetchTourDetail = async () => {
         try {
             setLoading(true);
-            const tourResponse = await get(`/api/tourism-info/tours/${id}/`);
+            const tourResponse = await get(`/api/information-center/tours/${id}/`);
             if (tourResponse.code === 200 && tourResponse.data) {
                 setTour(tourResponse.data);
                 fetchDestinationDetail(tourResponse.data.destination);
@@ -53,7 +53,7 @@ const TourDetail = () => {
 
     const fetchDestinationDetail = async (destinationId) => {
         try {
-            const destinationResponse = await get(`/api/tourism-info/destinations/${destinationId}/`);
+            const destinationResponse = await get(`/api/information-center/destinations/${destinationId}/`);
             if (destinationResponse.code === 200 && destinationResponse.data) {
                 setDestination(destinationResponse.data);
             } else {
@@ -68,7 +68,7 @@ const TourDetail = () => {
 
     const checkBookingStatus = async () => {
         try {
-            const response = await get('/api/tourism-info/tour-bookings/');
+            const response = await get('/api/information-center/tour-bookings/');
             if (response.code === 200 && response.data) {
                 const userBookings = response.data.filter(booking => 
                     booking.user_id === parseInt(user.id) && 
@@ -98,7 +98,7 @@ const TourDetail = () => {
 
         setBookingStatus('loading');
         try {
-            const response = await post('/api/tourism-info/tour-bookings/', {
+            const response = await post('/api/information-center/tour-bookings/', {
                 total_price: tour.price_per_person,
                 booking_status: true,
                 payment_status: true,

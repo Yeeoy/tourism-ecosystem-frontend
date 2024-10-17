@@ -1,70 +1,110 @@
-# Getting Started with Create React App
+# Travel Management System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project Overview
+This Travel Management System is a comprehensive web application designed to facilitate various aspects of travel planning and management. It includes features for hotel bookings, restaurant reservations, transportation information, event management, and an information center.
+
+## Key Features
+- User Authentication (Login/Register)
+- Hotel Management
+  - View hotel details and guest services
+  - Book hotel rooms
+  - Leave and manage reviews
+  - View hotel orders
+- Restaurant Management
+  - View restaurant details and menus
+  - Make table reservations
+  - Place and manage food orders
+  - View restaurant orders and table reservations
+- Transportation Information
+  - View transportation providers and route planning
+  - Book rides
+  - Check traffic updates
+  - View ride orders
+- Event Management
+  - Browse and search events
+  - Register for events
+  - View event orders
+- Tour Management
+  - Explore tour destinations
+  - View tour details
+  - Book tours
+  - Manage tour orders
+- Information Center
+  - Access travel guides and tips
+  - View local attractions and events
+- Event Logging System
+  - View event logs
+  - Download event logs as CSV
+  - Clear event logs
+- Multi-language Support
+- User Profile Management
+
+## Technology Stack
+- Frontend: React.js
+- State Management: React Context API
+- Routing: React Router
+- UI Components: Material-UI, Heroicons
+- Internationalization: react-i18next
+- HTTP Client: Axios
+- Styling: Tailwind CSS
+- Animations: React Transition Group
+
+## Getting Started
+
+### Prerequisites
+- Node.js (v14 or later)
+- npm (v6 or later)
+
+### Installation
+1. Clone the repository:
+   ```
+   git clone [your-repository-url]
+   ```
+2. Navigate to the project directory:
+   ```
+   cd travel-management-system
+   ```
+3. Install dependencies:
+   ```
+   npm install
+   ```
+
+
+### Running the Application
+1. Start the development server:
+   ```
+   npm start
+   ```
+2. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ## Available Scripts
+- `npm start`: Runs the app in development mode
+- `npm test`: Launches the test runner
+- `npm run build`: Builds the app for production
 
-In the project directory, you can run:
+## Project Structure
+- `src/components`: Reusable React components
+- `src/pages`: Individual page components (Home, Hotels, Restaurants, Events, Tours, etc.)
+- `src/context`: React Context for state management (AuthContext)
+- `src/utils`: Utility functions and API calls
+- `public/locales`: Internationalization files
 
-### `npm start`
+## Key Components
+- `Navbar`: Navigation component
+- `HotelDetail`: Displays detailed information about a hotel
+- `RestaurantDetail`: Shows restaurant information, menu, and reservation options
+- `TransportationInfo`: Provides transportation details and booking options
+- `EventLog`: Manages and displays system event logs
+- `BookingModule`: Handles various types of bookings (hotel, restaurant, tour)
+- `TableReservations`: Manages restaurant table reservations
+- `TourDetail`: Displays tour information and booking options
+- `Profile`: User profile management
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Authentication
+The system uses JWT (JSON Web Tokens) for authentication. The `AuthContext` provides login, register, and logout functionalities.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## API Integration
+API calls are centralized in the `api.js` file, which uses Axios for HTTP requests. The base URL can be configured via environment variables.
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Internationalization
+The application supports multiple languages using react-i18next. Language files are stored in the `public/locales` directory.

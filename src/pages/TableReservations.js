@@ -24,7 +24,7 @@ const TableReservations = () => {
 
     const fetchReservations = async () => {
         try {
-            const response = await get("/api/dining/table-reservations/");
+            const response = await get("/api/restaurant/table-reservations/");
             if (response.code === 200 && response.data) {
                 setReservations(response.data);
                 fetchRestaurants(response.data);
@@ -46,7 +46,7 @@ const TableReservations = () => {
         ];
         const restaurantPromises = uniqueRestaurantIds.map(async (id) => {
             try {
-                const response = await get(`/api/dining/restaurants/${id}/`);
+                const response = await get(`/api/restaurant/restaurants/${id}/`);
                 if (response.code === 200 && response.data) {
                     return { [id]: response.data.name };
                 }
@@ -67,7 +67,7 @@ const TableReservations = () => {
     const cancelReservation = async (reservationId) => {
         try {
             const response = await patch(
-                `/api/dining/table-reservations/${reservationId}/`,
+                `/api/restaurant/table-reservations/${reservationId}/`,
                 {
                     reservation_status: "Canceled",
                 }
@@ -91,7 +91,7 @@ const TableReservations = () => {
 
     const deleteReservation = async (reservationId) => {
         try {
-            await del(`/api/dining/table-reservations/${reservationId}/`);
+            await del(`/api/restaurant/table-reservations/${reservationId}/`);
             setReservations(
                 reservations.filter(
                     (reservation) => reservation.id !== reservationId

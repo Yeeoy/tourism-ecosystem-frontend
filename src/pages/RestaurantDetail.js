@@ -51,7 +51,7 @@ const RestaurantDetail = () => {
     const fetchRestaurantDetail = async () => {
         try {
             setLoading(true);
-            const response = await get(`/api/dining/restaurants/${id}/`);
+            const response = await get(`/api/restaurant/restaurants/${id}/`);
             if (response.code === 200 && response.data) {
                 setRestaurant(response.data);
             } else {
@@ -67,7 +67,7 @@ const RestaurantDetail = () => {
     const fetchMenu = async () => {
         try {
             const response = await get(
-                `/api/dining/menus/get_menu_by_restaurant/${id}/`
+                `/api/restaurant/menus/get_menu_by_restaurant/${id}/`
             );
             if (response.code === 200 && response.data) {
                 setMenu(response.data);
@@ -95,7 +95,7 @@ const RestaurantDetail = () => {
 
         try {
             const response = await post(
-                "/api/dining/online-orders/calculate-price/",
+                "/api/restaurant/online-orders/calculate-price/",
                 { items }
             );
             if (response.code === 200 && response.data) {
@@ -155,13 +155,13 @@ const RestaurantDetail = () => {
             order_date: currentDate.toISOString().split("T")[0],
             order_time: currentDate.toTimeString().split(" ")[0],
             order_status: "Confirmed",
-            user: user.id,
+            user_id: user.id,
             restaurant: parseInt(id),
         };
 
         try {
             const response = await post(
-                "/api/dining/online-orders/",
+                "/api/restaurant/online-orders/",
                 orderData
             );
             if (response.code === 201 && response.data) {
@@ -196,12 +196,12 @@ const RestaurantDetail = () => {
             number_of_guests: numberOfGuests,
             reservation_status: "Confirmed",
             restaurant: parseInt(id),
-            user: user.id,
+            user_id: user.id,
         };
 
         try {
             const response = await post(
-                "/api/dining/table-reservations/",
+                "/api/restaurant/table-reservations/",
                 reservationData
             );
             if (response.code === 201 && response.data) {

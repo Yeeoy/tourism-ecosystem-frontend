@@ -13,10 +13,10 @@ const api = axios.create({
 // 请求拦截器
 api.interceptors.request.use(
     (config) => {
-        // 从 localStorage 获取 token
-        const token = localStorage.getItem("token");
+        // 从 localStorage 获取 access token
+        const token = localStorage.getItem("access_token");
         if (token) {
-            config.headers["Authorization"] = `Token ${token}`;
+            config.headers["Authorization"] = `Bearer ${token}`;
         }
 
         // 添加 CSRF token
@@ -59,24 +59,13 @@ api.interceptors.response.use(
         if (error.response) {
             switch (error.response.status) {
                 case 401:
-                    // 未授权，可能是token过期
-                    // 这里可以处理登出逻辑
-                    localStorage.removeItem("token");
-                    window.location.href = "/login";
+                    // 只有在真正需要重新登录时才重定向
+                    if (error.response.data.code === "401") {
+                        localStorage.removeItem("access_token");
+                        window.location.href = "/login";
+                    }
                     break;
-                case 404:
-                    console.error("请求的资源不存在");
-                    break;
-                case 500:
-                    console.error("服务器错误");
-                    break;
-                default:
-                    console.error(`未处理的错误: ${error.response.status}`);
             }
-        } else if (error.request) {
-            console.error("未收到响应", error.request);
-        } else {
-            console.error("请求配置时出错", error.message);
         }
         return Promise.reject(error);
     }

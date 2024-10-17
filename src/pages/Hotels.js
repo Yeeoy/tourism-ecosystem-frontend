@@ -37,7 +37,7 @@ const Hotels = () => {
     const fetchHotels = async () => {
         try {
             setLoading(true);
-            const response = await get("/api/accommodation/accommodation/");
+            const response = await get("/api/accommodation/accommodations/");
             if (response.code === 200 && response.data) {
                 setHotels(response.data);
                 setFilteredHotels(response.data);
@@ -57,7 +57,7 @@ const Hotels = () => {
         const typePromises = Array.from(types).map(async (typeId) => {
             try {
                 const response = await get(
-                    `/api/accommodation/room-type/${typeId}/`
+                    `/api/accommodation/room-types/${typeId}/`
                 );
                 if (response.code === 200 && response.data) {
                     return { [typeId]: response.data };

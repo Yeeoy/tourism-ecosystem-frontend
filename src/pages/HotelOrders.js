@@ -21,7 +21,7 @@ const HotelOrders = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await get('/api/accommodation/room-booking/');
+            const response = await get('/api/accommodation/room-bookings/');
             if (response.code === 200 && response.data) {
                 setOrders(response.data);
                 fetchRoomTypes(response.data);
@@ -40,7 +40,7 @@ const HotelOrders = () => {
         const uniqueRoomTypeIds = [...new Set(orders.map(order => order.room_type_id))];
         const roomTypePromises = uniqueRoomTypeIds.map(async (id) => {
             try {
-                const response = await get(`/api/accommodation/room-type/${id}/`);
+                const response = await get(`/api/accommodation/room-types/${id}/`);
                 if (response.code === 200 && response.data) {
                     return { [id]: response.data.room_type };
                 }
@@ -59,7 +59,7 @@ const HotelOrders = () => {
         const uniqueHotelIds = [...new Set(orders.map(order => order.accommodation_id))];
         const hotelPromises = uniqueHotelIds.map(async (id) => {
             try {
-                const response = await get(`/api/accommodation/accommodation/${id}/`);
+                const response = await get(`/api/accommodation/accommodations/${id}/`);
                 if (response.code === 200 && response.data) {
                     return { [id]: response.data.name };
                 }
@@ -76,7 +76,7 @@ const HotelOrders = () => {
 
     const cancelOrder = async (orderId) => {
         try {
-            const response = await patch(`/api/accommodation/room-booking/${orderId}/`, {
+            const response = await patch(`/api/accommodation/room-bookings/${orderId}/`, {
                 booking_status: false,
                 payment_status: false
             });
@@ -97,7 +97,7 @@ const HotelOrders = () => {
 
     const deleteOrder = async (orderId) => {
         try {
-            await del(`/api/accommodation/room-booking/${orderId}/`);
+            await del(`/api/accommodation/room-bookings/${orderId}/`);
             setOrders(orders.filter(order => order.id !== orderId));
             showToast.success(t('orderDeletedSuccessfully'));
         } catch (err) {

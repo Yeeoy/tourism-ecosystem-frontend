@@ -40,7 +40,7 @@ const HotelDetail = () => {
     const fetchHotelDetail = async () => {
         try {
             const response = await get(
-                `/api/accommodation/accommodation/${id}/`
+                `/api/accommodation/accommodations/${id}/`
             );
             if (response.code === 200 && response.data) {
                 setHotel(response.data);
@@ -57,7 +57,7 @@ const HotelDetail = () => {
         const typePromises = types.map(async (typeId) => {
             try {
                 const response = await get(
-                    `/api/accommodation/room-type/${typeId}/`
+                    `/api/accommodation/room-types/${typeId}/`
                 );
                 if (response.code === 200 && response.data) {
                     return { [typeId]: response.data };
@@ -76,9 +76,10 @@ const HotelDetail = () => {
     const fetchHotelReviews = async () => {
         try {
             const response = await get(
-                `/api/accommodation/feedback-review/accommodation/${id}/`
+                `/api/accommodation/feedback-reviews/accommodation/${id}/`
             );
             if (response.code === 200 && response.data) {
+                // 直接使用 response.data，不需要额外的过滤
                 setReviews(response.data);
             } else {
                 throw new Error(response.msg || t("failedToGetReviews"));
@@ -93,7 +94,7 @@ const HotelDetail = () => {
     const fetchGuestServices = async () => {
         try {
             const response = await get(
-                `/api/accommodation/guest-service/guestService/${id}/`
+                `/api/accommodation/guest-services/guestService/${id}/`
             );
             if (response.code === 200 && response.data) {
                 setGuestServices(response.data);
@@ -117,13 +118,16 @@ const HotelDetail = () => {
             return;
         }
         try {
-            const response = await post("/api/accommodation/feedback-review/", {
-                rating: newRating,
-                review: newReview,
-                date: new Date().toISOString().split("T")[0],
-                accommodation_id: parseInt(id),
-                user: user.id,
-            });
+            const response = await post(
+                "/api/accommodation/feedback-reviews/",
+                {
+                    rating: newRating,
+                    review: newReview,
+                    date: new Date().toISOString().split("T")[0],
+                    accommodation_id: parseInt(id),
+                    user_id: parseInt(userId), // 使用 userId 而不是 user.id
+                }
+            );
             if (response.code === 201 && response.data) {
                 showToast.success(t("reviewSubmitted"));
                 setReviews((prevReviews) => [response.data, ...prevReviews]);
@@ -140,7 +144,7 @@ const HotelDetail = () => {
     const handleDeleteReview = async (reviewId) => {
         if (window.confirm(t("confirmDeleteReview"))) {
             try {
-                await del(`/api/accommodation/feedback-review/${reviewId}/`);
+                await del(`/api/accommodation/feedback-reviews/${reviewId}/`);
                 setReviews((prevReviews) =>
                     prevReviews.filter((review) => review.id !== reviewId)
                 );
@@ -414,32 +418,27 @@ const HotelDetail = () => {
                                                     )
                                                 )}
                                                 <span className="ml-2 text-gray-600">
-                                                    ({review.rating}{" "}
-                                                    {t("stars")})
+                                                    ({review.rating} {t("stars")})
                                                 </span>
                                             </div>
-                                            {userId &&
-                                                userId ===
-                                                    review.user.toString() && (
-                                                    <button
-                                                        onClick={() =>
-                                                            handleDeleteReview(
-                                                                review.id
-                                                            )
-                                                        }
-                                                        className="text-red-500 hover:text-red-700">
-                                                        <TrashIcon className="h-5 w-5" />
-                                                    </button>
-                                                )}
+                                            {userId && parseInt(userId) === review.user_id && (
+                                                <button
+                                                    onClick={() =>
+                                                        handleDeleteReview(
+                                                            review.id
+                                                        )
+                                                    }
+                                                    className="text-red-500 hover:text-red-700">
+                                                    <TrashIcon className="h-5 w-5" />
+                                                </button>
+                                            )}
                                         </div>
                                         <p className="text-gray-700 mb-2">
                                             {review.review}
                                         </p>
                                         <p className="text-sm text-gray-500">
                                             {t("reviewDate")}: {review.date}
-                                            {userId &&
-                                            userId ===
-                                                review.user.toString() ? (
+                                            {userId && parseInt(userId) === review.user_id ? (
                                                 <span className="ml-2 text-blue-500">
                                                     ({t("self")})
                                                 </span>

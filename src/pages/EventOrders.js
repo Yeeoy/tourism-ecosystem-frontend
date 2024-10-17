@@ -19,7 +19,7 @@ const EventOrders = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await get('/api/events/venue-booking/');
+            const response = await get('/api/event-organizers/venue-booking/');
             if (response.code === 200 && response.data) {
                 setOrders(response.data);
                 fetchEvents(response.data);
@@ -37,7 +37,7 @@ const EventOrders = () => {
         const uniqueEventIds = [...new Set(orders.map(order => order.event_id))];
         const eventPromises = uniqueEventIds.map(async (id) => {
             try {
-                const response = await get(`/api/events/event/${id}/`);
+                const response = await get(`/api/event-organizers/event/${id}/`);
                 if (response.code === 200 && response.data) {
                     return { [id]: response.data };
                 }
@@ -54,7 +54,7 @@ const EventOrders = () => {
 
     const cancelOrder = async (orderId) => {
         try {
-            const response = await patch(`/api/events/venue-booking/${orderId}/`, {
+            const response = await patch(`/api/event-organizers/venue-booking/${orderId}/`, {
                 booking_status: false
             });
             if (response.code === 200 && response.data) {
@@ -74,7 +74,7 @@ const EventOrders = () => {
 
     const deleteOrder = async (orderId) => {
         try {
-            await del(`/api/events/venue-booking/${orderId}/`);
+            await del(`/api/event-organizers/venue-booking/${orderId}/`);
             setOrders(orders.filter(order => order.id !== orderId));
             showToast.success(t('orderDeletedSuccessfully'));
         } catch (err) {

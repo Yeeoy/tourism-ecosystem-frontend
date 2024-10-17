@@ -19,7 +19,7 @@ const TourOrders = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await get('/api/tourism-info/tour-bookings/');
+            const response = await get('/api/information-center/tour-bookings/');
             if (response.code === 200 && response.data) {
                 setOrders(response.data);
                 fetchTours(response.data);
@@ -37,7 +37,7 @@ const TourOrders = () => {
         const uniqueTourIds = [...new Set(orders.map(order => order.tour_id))];
         const tourPromises = uniqueTourIds.map(async (id) => {
             try {
-                const response = await get(`/api/tourism-info/tours/${id}/`);
+                const response = await get(`/api/information-center/tours/${id}/`);
                 if (response.code === 200 && response.data) {
                     return { [id]: response.data };
                 }
@@ -54,7 +54,7 @@ const TourOrders = () => {
 
     const cancelOrder = async (orderId) => {
         try {
-            const response = await patch(`/api/tourism-info/tour-bookings/${orderId}/`, {
+            const response = await patch(`/api/information-center/tour-bookings/${orderId}/`, {
                 booking_status: false,
                 payment_status: false
             });
@@ -75,7 +75,7 @@ const TourOrders = () => {
 
     const deleteOrder = async (orderId) => {
         try {
-            await del(`/api/tourism-info/tour-bookings/${orderId}/`);
+            await del(`/api/information-center/tour-bookings/${orderId}/`);
             setOrders(orders.filter(order => order.id !== orderId));
             showToast.success(t('orderDeletedSuccessfully'));
         } catch (err) {

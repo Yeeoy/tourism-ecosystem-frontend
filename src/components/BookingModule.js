@@ -64,7 +64,7 @@ const BookingModule = ({ hotelId, roomTypes, isLoggedIn }) => {
         }
         try {
             const userId = localStorage.getItem("user_id");
-            const response = await post("/api/accommodation/room-booking/", {
+            const response = await post("/api/accommodation/room-bookings/", {
                 check_in_date: checkInDate,
                 check_out_date: checkOutDate,
                 booking_status: true,

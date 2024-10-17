@@ -47,7 +47,7 @@ function Events() {
     const fetchEvents = async () => {
         try {
             setLoading(true);
-            const eventsResponse = await get('/api/events/event/');
+            const eventsResponse = await get('/api/event-organizers/event/');
             if (eventsResponse.code === 200 && eventsResponse.data) {
                 setEvents(eventsResponse.data);
                 setFilteredEvents(eventsResponse.data);
@@ -64,7 +64,7 @@ function Events() {
 
     const fetchPromotions = async () => {
         try {
-            const promotionsResponse = await get('/api/events/event-promotion/');
+            const promotionsResponse = await get('/api/event-organizers/event-promotion/');
             if (promotionsResponse.code === 200 && promotionsResponse.data) {
                 const promotionsMap = {};
                 promotionsResponse.data.forEach(promo => {
@@ -119,7 +119,7 @@ function Events() {
         setParticipants(newParticipants);
 
         try {
-            const response = await post('/api/events/venue-booking/calculate-price/', {
+            const response = await post('/api/event-organizers/venue-booking/calculate-price/', {
                 event: eventId,
                 number_of_tickets: newParticipants[eventId]
             });
@@ -161,7 +161,7 @@ function Events() {
 
         try {
             setBookingStatus(prev => ({ ...prev, [eventId]: 'loading' }));
-            const response = await post("/api/events/venue-booking/", {
+            const response = await post("/api/event-organizers/venue-booking/", {
                 booking_date: new Date().toISOString(),
                 booking_status: true,
                 number_of_tickets: participants[eventId],

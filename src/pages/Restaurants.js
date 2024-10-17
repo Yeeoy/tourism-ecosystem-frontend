@@ -34,7 +34,7 @@ const Restaurants = () => {
     const fetchRestaurants = async () => {
         try {
             setLoading(true);
-            const response = await get('/api/dining/restaurants/');
+            const response = await get('/api/restaurant/restaurants/');
             if (response.code === 200 && response.data) {
                 setRestaurants(response.data);
                 setFilteredRestaurants(response.data);

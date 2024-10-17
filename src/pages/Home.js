@@ -35,10 +35,10 @@ const Home = () => {
         try {
             setLoading(true);
             const [hotelsResponse, eventsResponse, toursResponse, restaurantsResponse] = await Promise.all([
-                get("/api/accommodation/accommodation/"),
-                get('/api/events/event/'),
-                get('/api/tourism-info/destinations/'),
-                get('/api/dining/restaurants/')
+                get("/api/accommodation/accommodations/"),
+                get('/api/event-organizers/event/'),
+                get('/api/information-center/destinations/'),
+                get('/api/restaurant/restaurants/')
             ]);
 
             if (hotelsResponse.code === 200 && hotelsResponse.data) {

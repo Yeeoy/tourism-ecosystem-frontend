@@ -1,13 +1,13 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
-import { showToast } from "../utils/toast";
 import { useTranslation } from "react-i18next";
 import {
     LockClosedIcon,
     UserIcon,
     EnvelopeIcon,
 } from "@heroicons/react/24/solid";
+import { showToast } from "../utils/toast";
 
 const Register = () => {
     const { t } = useTranslation();
@@ -21,22 +21,16 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        try {
-            await register(name, email, password);
+        const response = await register(name, email, password);
+        if (response.code === 200) {
             showToast.success(t("registrationSuccess"));
             setTimeout(() => {
                 navigate("/");
             }, 2000);
-        } catch (err) {
-            if (err.message === t("emailAlreadyExists")) {
-                showToast.error(t("emailAlreadyExists"));
-            } else {
-                showToast.error(t("registrationFailed"));
-            }
-            console.error(err);
-        } finally {
-            setLoading(false);
+        } else {
+            showToast.error(response.error || t("registrationFailed"));
         }
+        setLoading(false);
     };
 
     return (
